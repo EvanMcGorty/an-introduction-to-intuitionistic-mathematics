@@ -7,33 +7,33 @@ module AnIntroductionToIntuitionisticMathematics where
 
 Preface.
 
-Intuitionistic mathematics is a form of constructive mathematics which is built on top of intuitionistic logic.
+Intuitionistic Mathematics provides a way to construct formal mathematical proofs as well defined mathematical objects.
 
-In intuitionistic logic, proofs may be understood as programs, and propositions may be understood as types of programs.
+Specifically, proofs may be seen as programs, and propositions accordingly as properties or types of said programs.
 
-We can formalize all(?) of mathematics as well-typed code which can be verified mechanically by running a type checker.
+With enough work, we can formalize all of mathematics as typed code, which can be formally verified by a type checker.
 
-This interactive tutorial uses an intuitionistic proof assistant and functional programming language called Agda.
+This interactive tutorial uses an intuitionistic proof assistant and programming language called Agda.
 
-If you wish to fill in the exercises, install `agda` and the text editor `emacs`, and run `agda --emacs-mode setup`.
+To fill in the exercises you must install `agda` and `emacs`, and run `agda --emacs-mode setup` before starting emacs.
 
 Agda was designed around its powerful interactive editing with emacs, so use another editor at your own discretion.
 
 Open this file in emacs and load it into Agda by pressing "C-c C-l", which is emacs-speak for key combo "Ctrl-c Ctrl-l".
 
-If you set everything up correctly, you should now see an empty informational window, and code should be colored.
+If everything is set up correctly, you should now see an (empty) informational window, and code should be colored.
 
 In emacs you can zoom in and out with "C-x C-+" (Ctrl-x Ctrl-plus) and "C-x C--" (Ctrl-x Ctrl-minus) respectively.
 
 Part 1. Pure Functional Programming
 
-A "pure" function is one which always produces one and the same output for a given input, without causing side effects.
+A "pure" function always produces one and the same output for a given input, without causing side effects.
 
-Pure functions have a mathematical flavor, and make it easy to use equational reasoning to prove properties about them.
+Pure functions have a mathematical flavor, since we can use equational reasoning to prove properties about them.
 
 In Agda, functions are required not just to be pure but also "total", meaning they may not fail or loop indefinitely.
 
-This is not to say that we cannot write e.g. imperative functions, just that we must model them with pure functions.
+This is not to say that we cannot write typical imperative functions, just that we must model them with pure functions.
 
 In Part 2, this very clean and mathematical foundation will enable us to write proofs about our Agda code, *in Agda*.
 
@@ -49,6 +49,8 @@ data Bool : Set where
 
 {-
 
+"X : Y" means "X is of type Y", so we have effectively declared "Bool is a Set, false is a Bool, and true is a Bool".
+
 We can now declare the existence of functions between booleans, such as the negation function:
 
 -}
@@ -59,7 +61,7 @@ not : Bool -> Bool
 
 This is called a type signature and it states that `not` is a function with a boolean input and a boolean output.
 
-Agda checks that this type signature is respected by the definition of `not`, which we can construct as follows:
+Agda checks that this type signature is respected by the definition of `not`, which we can give as follows:
 
 -}
 
@@ -68,17 +70,19 @@ not true = false
 
 {-
 
-Notice how in Agda we leave out the parentheses found in math and most programming languages (e.g. `not(false) = true`).
+`not` applied to an input of `false` results in it returning an output of `true`, and vice versa.
+
+Agda lets us leave out the parentheses used in most programming languages and mathematics (as in "not(false) = true").
 
 To define functions accepting multiple input parameters in Agda, we use a trick called "Currying".
 
-Rather than accepting e.g. two inputs at once, we accept one input, and return a function accepting the another input.
+Rather than accepting two inputs at once, we can accept one input, and then output a function accepting another input.
 
 So instead of the "uncurried" function type `(A, B) -> C`, we use the "curried" function type `A -> (B -> C)`.
 
 Consequently we don't write function application like `f(x, y)`, but rather like `f(x)(y)`, or in Agda just `f x y`.
 
-Notably, the function arrow associates to the right, meaning that `A -> B -> C` is parsed as  `A -> (B -> C)`.
+Notably, the function arrow associates to the right, meaning `A -> (B -> C)` can be written simply as `A -> B -> C`.
 
 One such function with two inputs and one output is the boolean `and` operation:
 
@@ -92,15 +96,15 @@ and true true = true
 
 {-
 
-The definitions of `not` and `and` used so-called "pattern matching" to map every possible set of inputs to an output.
+The definitions of `not` and `and` use so-called "pattern matching" to map every possible set of inputs to an output.
 
-However we can also bind input parameters to variables, which match any input, and can be used to define the output:
+However we can also bind input parameters to variables, which match any input and can be used to define an output:
 
 -}
 
 or : Bool -> Bool -> Bool
-or true x = true
 or false x = x
+or true x = true
 
 {-
 
@@ -120,30 +124,30 @@ xor false x = false
 
 The last case gives the impression that `xor false x` is always equal to `false`, for any `x`.
 
-However, it overlaps with the previous case, and therefore only holds if the inputs are not `false true`.
+However, it overlaps with the previous case, and therefore only holds if the inputs do not match `false true`.
 
 Agda's syntax highlighting colors this case to indicate that it overlaps with previous cases and is not a true equality.
 
-Naturally, functions may also be defined in terms of other functions:
+Naturally, functions may also be defined in terms of other previously defined functions:
 
 -}
 
 implies : Bool -> Bool -> Bool
-implies l r = or r (not l) -- I.e. "l implies r" is equivalent to "r or not l"
+implies l r = or r (not l) -- "l implies r" is equivalent to "r or not l"
 
 {-
 
-Notice how function application associates to the left, so `or r (not l)` is the same as as `or(r)(not(l))`.
+Function application associates to the left, so `or r (not l)` is parsed as `or(r)(not(l))`, not as `or(r(not(l)))`.
 
-The use of parenthesis here is critical, as `or r not l` would have wrongly been interpreted as `or(r)(not)(l)`.
+The parentheses used here are critical, as `or r not l` would be parsed as `or(r)(not)(l)`.
 
 Try deleting these parentheses, reloading with C-c C-l, and making sense of the error message you get.
 
-In emacs, you can undo these changes with C-/, at which point you should reload again to get rid of the error message.
+Be sure to undo these changes and reload again to get rid of the error message.
 
-Like any programming language, Agda supports comments which are ignored by the typechecker and have no effect on code.
+Like any programming language, Agda supports comments, which are ignored by the typechecker and have no effect on code.
 
-Block comments are delimited by `{-` and `-}`, single-line comments begin with `--`.
+Block comments are delimited by `{-` and `-}`, and single-line comments begin with `--`.
 
 It can be useful to comment out code which we don't want Agda to load, e.g. because it has an error:
 
@@ -154,15 +158,15 @@ It can be useful to comment out code which we don't want Agda to load, e.g. beca
 
 {-
 
-By selecting lines of code and hitting "M-;" (emacs for "alt+semicolon"), you can easily comment them out or back in.
+By selecting lines of code and hitting "C-x C-;" (Ctrl-x Ctrl-semicolon), you can easily comment them out or back in.
 
 Try temporarily commenting bad-xor back in and reloading with C-c C-l to see what kind of error you get.
 
-Agda allows us to use nearly any character we desire as part of a name, including `-`, `'`, and even unicode characters.
+Note that Agda lets us to use nearly any character as part of a name, including `-`, `'`, and even unicode characters.
 
 One character with a special meaning in a name, however, is underscore, which is used for so-called "mixfix" syntax.
 
-Each underscore in the name of a function indicates where a parameter belongs syntactically:
+Each underscore in the name of a function indicates where an input parameter belongs syntactically:
 
 -}
 
@@ -171,13 +175,13 @@ l && r = and l r
 
 {-
 
-This defines a synonym for `and` called `_&&_`, where `l && r` carries the same meaning as `_&&_ l r`.
+This defines a synonym for `and` called `_&&_`, where `l && r` carries the same exact meaning as `_&&_ l r`.
 
 We could have just as well written "_&&_ l r = and l r" for the definition, as there is absolutely no difference.
 
 Note that the whitespace between each symbol is mandatory, and "l&&r" would be parsed as a singular, unrelated symbol.
 
-Another cool thing we can do in Agda is define "higher order functions" which accept other functions as inputs:
+Another useful thing we can do in Agda is define "higher order functions" which accept other functions as inputs:
 
 -}
 
@@ -188,6 +192,22 @@ always-outputs-true f = f false && f true
 {-
 
 Notice that we need to wrap the `Bool -> Bool` argument in parentheses, since `->` does not associate to the left.
+
+Not only are functions treated as first class values in Agda, but types are as well, allowing us to define type aliases:
+
+-}
+
+BoolToBool : Set
+BoolToBool = Bool -> Bool
+
+always-outputs-false : BoolToBool -> Bool
+always-outputs-false f = not (f false) && not (f true)
+
+{-
+
+BoolToBool is a regular definition, but it has the type Set, and can be used anywhere where a Set can be used.
+
+When used in a type signature, Agda will happily substitute in the definition of BoolToBool before type checking.
 
 Exercises:
 
@@ -211,70 +231,103 @@ Another useful trick is to fill a hole with an expression containing yet more ho
 
 We can do this by simply writing an expression containing question marks, and hitting C-c C-Space.
 
-Uncomment the following definition, reload, and try hitting C-c C-Space with your cursor placed in the hole:
+Try this by uncommenting the following definition, reloading, writing "not ?" in the hole, and hitting C-c C-Space:
 
 -}
 
 -- nand : Bool -> Bool -> Bool
--- nand x y = {! not ? !}
+-- nand x y = ?
 
 {-
 
-It is crucial to learn to work with holes, which become extremely useful when writing more complex programs and proofs.
+Note that you must reload with C-c C-l after making changes outside of a hole, otherwise Agda won't know about them.
 
-Complete as few or as many of the remaining exercises as you see fit:
+If you rename an input variable and try to use it to fill in a hole without reloading, Agda wont recognize it.
+
+This tutorial contains an excess of exercises, so complete whatever interests you before moving on to the next chapter.
+
+If you get stuck on or lose interest in an exercise, it is best to just skip it so you may come back to it later.
 
 -}
 
--- 3-ary and
+-- `and` for 3 inputs
 -- and3 : Bool -> Bool -> Bool -> Bool
 -- and3 x y z = ?
 
 -- A synonym for `implies`, but missing a definition
--- _=>_ Bool -> Bool -> Bool
+-- _=>_ : Bool -> Bool -> Bool
 
 -- A synonym for `xor`, but missing a type signature
 -- x ^^ y = ?
 
 -- Define boolean equality, aka biimplication, as the symbol _<=>_
 
--- Tells you whether the provided function returns false regardless of what input it is given
--- always-outputs-false : (Bool -> Bool) -> Bool
--- always-outputs-false f = ?
+-- Tells you whether the provided function always outputs the same input it is given
+-- is-the-identity-function : (Bool -> Bool) -> Bool
+-- is-the-identity-function f = ?
 
--- Define a function which tells you whether its input (which is itself a function) is the `not` function
+-- Define a function which tells you whether its input is the `not` function
 
--- While there are two distinct `Bool`s, there are four distinct `Bool -> Bool`s
-
--- Pick some way to order the `Bool -> Bool`s 1st through 4th and fill in the following definitions
--- firstBoolToBool : Bool -> Bool
--- firstBoolToBool x = ?
--- secondBoolToBool : Bool -> Bool
--- secondBoolToBool x = ?
--- thirdBoolToBool : Bool -> Bool
--- thirdBoolToBool x = ?
--- fourthBoolToBool : Bool -> Bool
--- fourthBoolToBool x = ?
-
--- Compares two `Bool -> Bool`s for equality
--- _=[BoolToBool]=_ : (Bool -> Bool) -> (Bool -> Bool) -> Bool
+-- Compare two `Bool -> Bool`s for equality
+-- _=[BoolToBool]=_ : BoolToBool -> BoolToBool -> Bool
 -- f =[BoolToBool]= g = ?
 
--- An increment function which wraps around from fourth to first
--- nextBoolToBool : (Bool -> Bool) -> Bool -> Bool
--- nextBoolToBool f = ?
+-- We can think of a `Bool -> Bool` as a constructive representation of a subset of the booleans
+-- Each `Bool -> Bool` is a predicate which tells you if a given `Bool` is contained by the respective subset
+-- Therefore `Bool -> Bool` itself is the Set of all subsets of (aka the "powerset" of) the Set of booleans
+PBool : Set
+PBool = Bool -> Bool
 
--- Similarly, an addition function which wraps around from fourth to first
--- addBoolToBool : (Bool -> Bool) -> (Bool -> Bool) -> Bool -> Bool
--- addBoolToBool f g = ?
+-- There are exactly 4 subsets of the booleans, define each of them:
+
+-- PBool[] : PBool
+-- PBool[] x = ?
+
+-- PBool[false] : PBool
+-- PBool[false] x = ?
+
+-- PBool[true] : PBool
+-- PBool[true] x = ?
+
+-- PBool[false,true] : PBool
+-- PBool[false,true] x = ?
+
+-- The union of two (sub-)sets contains all elements which either of them contains
+-- PBool-union : PBool -> PBool -> PBool
+-- PBool-union f g x = ?
+
+-- The intersection of two (sub-)sets contains all elements which both of them contain
+-- PBool-intersection : PBool -> PBool -> PBool
+-- PBool-intersection f g x = ?
+
+-- The difference of two (sub-)sets contains all elements contained by the former but not the latter
+-- PBool-difference : PBool -> PBool -> PBool
+-- PBool-difference f g x = ?
+
+-- We can define an extension of the booleans with a third "unknown" value
+data MaybeBool : Set where
+  mfalse : MaybeBool
+  mtrue : MaybeBool
+  munknown : MaybeBool
+
+-- Complete the following definitions which should properly propogate the unknown-ness of relevant inputs to outputs
+-- If the respective function over the booleans returns an output regardless of the input.
+
+-- mnot : MaybeBool -> MaybeBool
+-- mnot x = ?
+
+-- mand : MaybeBool -> MaybeBool -> MaybeBool
+-- mand x y = ?
+
+-- mor : MaybeBool -> MaybeBool -> MaybeBool
+-- mor x y = ?
+
+-- BoolFunc-to-MaybeBoolFunc : (Bool -> Bool) -> MaybeBool -> MaybeBool
+-- BoolFunc-to-MaybeBoolFunc f x = ?
 
 {-
 
 Tips and Tricks:
-
-Always reload with C-c C-l after making changes outside of a hole, otherwise Agda won't know about them.
-
-If you rename a parameter variable and try to use it to fill in a hole without reloading, Agda wont recognize it.
 
 To test your code, you can normalize an expression within a hole by entering the key combo C-c C-n.
 
@@ -292,34 +345,40 @@ Use holes and C-c C-n liberally to test your code while commenting them out to a
 
 Challenge Exercises:
 
-(Note: these exercises can be very difficult and are best avoided by readers who are pressed for time)
-
-Just as there are 4 different `Bool -> Bool`s, there are 16 different `Bool -> Bool -> Bool`s.
-
-Furthermore, there are a whopping 256 different `Bool -> Bool -> Bool -> Bool`s.
-
-By mapping each distinct function of such a type to a number, we can treat these types like size-bounded number types.
-
-Find some such mapping with which you can define the following operations.
+Beware: challenge exercises can be very difficult and time consuming
 
 -}
 
--- A "UInt<n>" refers to an unsigned integer with "n" bits, and can represent the first 2^n natural numbers
+-- Just as there are 4 different `Bool -> Bool`s, there are 16 different `Bool -> Bool -> Bool`s.
+-- Furthermore, there are a whopping 256 different `Bool -> Bool -> Bool -> Bool`s.
+-- By assigning a number to each distinct function of such a type, we can treat these types like bounded number types.
+-- Find some such set of assignments with which you can define the following operations.
 
--- bitwiseNotUInt8 : (Bool -> Bool -> Bool -> Bool) -> Bool -> Bool -> Bool -> Bool
+-- A "UIntN" refers to an unsigned integer with "N" bits, and can represent the first 2^N natural numbers
+UInt1 : Set
+UInt1 = Bool
+UInt2 : Set
+UInt2 = Bool -> Bool
+UInt4 : Set
+UInt4 = Bool -> Bool -> Bool
+UInt8 : Set
+UInt8 = Bool -> Bool -> Bool -> Bool
+
+-- bitwiseNotUInt8 : UInt8 -> UInt8
 -- bitwiseNotUInt8 f x y z = ?
 
--- bitwiseAndUInt8 : (Bool -> Bool -> Bool -> Bool) -> (Bool -> Bool -> Bool -> Bool) -> Bool -> Bool -> Bool -> Bool
+-- bitwiseAndUInt8 : UInt8 -> UInt8 -> UInt8
 -- bitwiseAndUInt8 f g x y z = ?
 
 -- Hint: to define an operation over UInt8, it may help to first define it over UInt1, UInt2, and UInt4.
 
--- addUInt8 : (Bool -> Bool -> Bool -> Bool) -> (Bool -> Bool -> Bool -> Bool) -> Bool -> Bool -> Bool -> Bool
+-- addUInt8 : UInt8 -> UInt8 -> UInt8
 -- addUInt8 f g x y z = ?
 
--- multiplyUInt4 : (Bool -> Bool -> Bool) -> (Bool -> Bool -> Bool) -> (Bool -> Bool -> Bool -> Bool)
+-- multiplyUInt4 : UInt4 -> UInt4 -> UInt8
 -- multiplyUInt4 f g x y z = ?
 
+-- How many different `(Bool -> Bool) -> Bool -> Bool`s are there?
 -- How many different `((Bool -> Bool) -> Bool) -> Bool`s are there?
 
 {-
@@ -328,7 +387,7 @@ Chapter 2. Natural Numbers
 
 The booleans were defined by the unique ways they can be constructed, namely by the "constructors" `true` and `false`.
 
-The Set of natural numbers are defined by the element `zero`, and the successor function `suc(n)` aka "n + 1":
+The Set of natural numbers can be defined by the element `zero`, and the successor function `suc(n)` i.e. "n + 1":
 
 -}
 
@@ -353,12 +412,12 @@ three = suc (suc (suc zero)) -- 0 + 1 + 1 + 1
 
 {-
 
-We could even port this into a typical imperative language like:
+We could port this definition of Nat into a typical imperative programming language like:
   interface Nat {};
   class zero extends Nat {};
   class suc extends Nat { Nat n; };
   ...
-  Nat three = new suc(n = new suc(n = new suc(n = zero())))
+  Nat three = new suc(n = new suc(n = new suc(n = new zero())))
 
 This singly-linked-list representation of the natural numbers is obviously quite bloated and inefficient for most tasks.
 
@@ -375,19 +434,19 @@ pred (suc n) = n -- pred(n + 1) = n
 
 {-
 
-When handling the `suc` case, we are handed the input to which the suc function was applied, namely the input minus one.
+When handling the `suc` case, we are handed the value to which the suc function was applied, namely the input minus one.
 
 We can also nest patterns, e.g. by pattern matching again against the natural number we are handed in the `suc` case:
 
 -}
 
 is-two : Nat -> Bool
-is-two (suc (suc zero)) = true
-is-two other = false
+is-two (suc (suc zero)) = true -- is-two(0 + 1 + 1) = true
+is-two other = false -- is-two(other) = false
 
 isGreaterThan-two : Nat -> Bool
-isGreaterThan-two (suc (suc (suc n))) = true
-isGreaterThan-two other = false
+isGreaterThan-two (suc (suc (suc n))) = true -- isGreaterThan-two(n + 1 + 1 + 1) = true
+isGreaterThan-two other = false -- isGreaterThan-two(other) = true
 
 {-
 
@@ -399,19 +458,19 @@ isEven : Nat -> Bool
 isEven zero = true -- zero is even
 isEven (suc n) = not (isEven n) -- n+1 is even <=> n is not even
 
--- Again, a "fake" halving function, which rounds up so we have not yet defined fractions
+-- Again, a "fake" halving function, which rounds up since we have not yet defined fractions
 halfOf : Nat -> Nat
-halfOf zero = zero -- 0 / 2 = 0
-halfOf (suc zero) = suc zero -- 1 / 2 = 1
-halfOf (suc (suc n)) = suc (halfOf n) -- (n + 2) / 2 = 1 + n / 2
+halfOf zero = zero -- ceil(0 / 2) = 0
+halfOf (suc zero) = suc zero -- ceil(1 / 2) = 1
+halfOf (suc (suc n)) = suc (halfOf n) -- ceil((n + 2) / 2) = 1 + ceil(n / 2)
 
 {-
 
-The recursive calls are clearly safe since `n` is literally a smaller piece of data than `suc n` or `suc (suc n)`.
+The recursive calls here are clearly safe since `n` is literally a smaller piece of data than `suc n` or `suc (suc n)`.
 
-If recursive calls only are made on structurally smaller pieces of data, then the function must terminate eventually.
+If recursive calls only are made on "structurally" smaller pieces of data, then the function must terminate eventually.
 
-This is in contrast to the following definition, which is not a total function, as it results in a termination error:
+This is in contrast to the following definition, which is not a total function and results in a termination error:
 
 -}
 
@@ -425,7 +484,7 @@ Here, not only is the input parameter not shrinking with each recursive call, it
 
 A function being total, however, is no guarantee that the termination checker will be able to see that it is total.
 
-To keep Agda's termination checking reliable, this structural shrinking needs to be obvious at a syntactical level.
+To keep Agda's termination checking reliable, this structural shrinking needs to be obvious at the syntax level.
 
 For example, we can't use another function which makes its input smaller, such as `pred`, in place of pattern matching:
 
@@ -446,7 +505,7 @@ For example, say we want to compute the minimum number of bits required to repre
 We can do so by observing how often we must halve a number (rounded up) before it reaches 1:
   binLength(0) = 1
   binLength(1) = 1
-  binLength(n) = 1 + (binLength(n / 2))
+  binLength(n) = 1 + binLength(ceil(n / 2))
 
 However we cannot halve a number by pattern matching, and Agda cannot see that the following definition terminates:
 
@@ -459,7 +518,9 @@ However we cannot halve a number by pattern matching, and Agda cannot see that t
 
 {-
 
-The simplest way to define this is to use a helper function which recurses over a sufficiently large dummy parameter:
+Proving that halfOf always shrinks its input is non-trivial, so Agda does not even bother trying to do so.
+
+The simplest workaround is to use a helper function which recurses over a sufficiently large dummy parameter:
 
 -}
 
@@ -483,17 +544,21 @@ Most definitions, and any (non-challenge) exercise in this tutorial, can be comp
 -}
 
 _+_ : Nat -> Nat -> Nat
-zero + m = m
-suc n + m = suc (n + m)
+zero + m = m -- 0 + m = m
+suc n + m = suc (n + m) -- (1 + n) + m = 1 + (n + m)
 
 {-
 
-Finally, we will note that this incredibly inefficient representation of natural numbers can be remedied in Agda:
+Finally, we will note that this incredibly inefficient representation of natural numbers can be remedied in Agda.
+
+While most languages have efficient number types built in, in Agda we may mark our definitions with `BUILTIN` pragmas:
 
 -}
 
--- Allows natural numbers to be stored compactly in memory, and also written efficiently as in the following definitions
+-- Ask Agda to to turn our `Nat` type into an efficent, primitive number type
 {-# BUILTIN NATURAL Nat #-}
+
+-- This also lets us use numeric literals to write Nats:
 
 four : Nat
 four = 4
@@ -501,13 +566,13 @@ four = 4
 five : Nat
 five = 5
 
-isThree : Nat -> Bool
-isThree 3 = true
-isThree n = false
+is-three : Nat -> Bool
+is-three 3 = true
+is-three n = false
 
--- Allows plus to be executed efficiently, e.g. so following hole's contents can be normalized without Agda hanging
+-- Allows addition to be computed efficiently
 {-# BUILTIN NATPLUS _+_ #-}
-
+-- Without this, normalizing the following hole's contents will cause Agda to hang
 -- _ = {! 200000000000000000 + 300000000000000000 !}
 
 {-
@@ -516,16 +581,16 @@ Exercises:
 
 Agda will help you interactively perform pattern matching on a variable of your choice with the case-split command.
 
-Try uncommenting the following line, reloading, placing your cursor in the hole, and pressing C-c C-c:
+Uncomment the following line, reload, write "n" in the hole, and press C-c C-c with your cursor still in the hole:
 
 -}
 
 -- isOdd : Nat -> Bool
--- isOdd n = {! n !}
+-- isOdd n = ?
 
 {-
 
-Use Agda's interactive editing to fill in the following definitions:
+Be sure to take full advantage of Agda's interactive editing when completing exercises.
 
 -}
 
@@ -538,7 +603,7 @@ Use Agda's interactive editing to fill in the following definitions:
 -- _^_ : Nat -> Nat -> Nat
 -- n ^ m = ?
 
--- Equality
+-- Equality for natural numbers
 -- _=[Nat]=_ : Nat -> Nat -> Bool
 -- n =[Nat]= m = ?
 
@@ -568,12 +633,43 @@ Use Agda's interactive editing to fill in the following definitions:
 -- product : (Nat -> Nat) -> Nat -> Nat
 -- product f n = ?
 
--- After correctly filling in and testing the above definitions, comment in the following BUILTIN-pragmas.
--- Note that BUILTIN-pragmas verify your definitions on a best-effort basis and may fail even for a correct definition.
+-- After correctly filling in and testing the above definitions, comment in the following BUILTIN-pragmas
+-- Note that BUILTIN-pragmas verify your definitions on a best-effort basis and may fail even for a correct definition
 -- {-# BUILTIN NATTIMES _*_ #-}
 -- {-# BUILTIN NATMINUS _-_ #-}
 -- {-# BUILTIN NATEQUALS _=[Nat]=_ #-}
 -- {-# BUILTIN NATLESS _<_ #-}
+
+-- Once we have defined the natural numbers, it is easy to define the integers in terms of them
+-- The data type `Int` provides a way to turn a natural number into a positive integer or a negative integer
+-- However we must take care to avoid creating distinct ways to write the same integer, such as "0" and "-0"
+
+data Int : Set where
+  -- Maps a natural number `n` to the integer `n` (which is greater than or equal to zero)
+  int : Nat -> Int
+  -- Maps a natural number `n` to the integer `-1 - n` (which is strictly less than zero)
+  -[1+ _] : Nat -> Int
+
+-- _I+_ : Int -> Int -> Int
+-- x I+ y = ?
+
+-- _I-_ : Int -> Int -> Int
+-- n I- m = ?
+
+-- _I*_ : Int -> Int -> Int
+-- x I* y = ?
+
+-- _=[Int]=_ : Int -> Int -> Bool
+-- n =[Int]= m = ?
+
+-- _I<_ : Int -> Int -> Bool
+-- n I< m = ?
+
+-- _Imin_ : Int -> Int -> Int
+-- n Imin m = ?
+
+-- _Imax_ : Int -> Int -> Int
+-- n Imax m = ?
 
 {-
 
@@ -581,9 +677,13 @@ Tips and Tricks:
 
 Don't be afraid to define your own helper functions, just be sure to name them like "...-helper" to avoid name clashes.
 
-Use "C-c C-f" and "C-c C-b" to jump to the next or previous holes respectively, speeding up your interactive editing.
+Use "C-c C-f" and "C-c C-b" to jump to the next or previous hole respectively, speeding up your interactive editing.
 
-In emacs, "C-x 2" will split your screen horizontally into two windows, and "C-x 0" will get rid of the current window.
+In emacs, "C-x 2" will split the current window horizontally into two windows and "C-x 3" will split it vertically.
+
+"C-x 0" can then be used to delete a window, and "C-x C-1" can be used to delete all windows except the current one.
+
+While working on a definition, it can often help split the window in order to reference another part of the file.
 
 Challenge Exercises:
 
@@ -592,6 +692,7 @@ Challenge Exercises:
 -- We can think of a `Nat -> A` as an infinite sequence of `A`s.
 -- Therefore, we can think of a `Nat -> Nat -> Bool` as an infinite sequence of infinite sequences of booleans.
 -- Prove informally that there exists no `Nat -> Nat -> Bool` which enumerates every `Nat -> Bool`.
+
 -- For any `Nat -> Nat -> Bool`, construct a counterexample `Nat -> Bool` which it does not output for any input `Nat`:
 -- infinite-sequences-are-enumerable-counterexample : (Nat -> Nat -> Bool) -> Nat -> Bool
 -- infinite-sequences-are-enumerable-counterexample f n = ?
@@ -602,7 +703,16 @@ Challenge Exercises:
 -- flatten-sequence : (Nat -> Nat -> Nat) -> Nat -> Nat
 -- flatten-sequence f n = ?
 
--- Define some variant of the division and modulo operations that pass the termination checker.
+-- Define division and modulus operations for the natural numbers
+-- To avoid having to define division/modulus by zero, we implicitly add one to the input for the denominator
+
+-- _/[1+_] : Nat -> Nat -> Nat
+-- n /[1+ m ] = ?
+
+-- _%[1+_] : Nat -> Nat -> Nat
+-- n %[1+ m ] = ?
+
+-- Define a function which enumerates the prime numbers
 
 {-
 
@@ -627,7 +737,7 @@ id-for-BoolToBool x = x
 
 To avoid duplicating such a definition for every type we wish to use it with, we can define polymorphic functions.
 
-In Agda, polymorhpic functions are simply functions accepting an input of type Set, which is given a name in its type:
+In Agda, polymorhpic functions are simply functions accepting an input of type Set which is given a name in its type:
 
 -}
 
@@ -656,7 +766,7 @@ triple (suc x) = suc (suc (suc (triple x)))
 
 Here we have brought the first parameter into scope in the type signature rather than just in the definition.
 
-The `x` in the definition is entirely independent from (and in fact not even equal to) the `x` in the type signature.
+The `x` in the type signature is entirely independent from (and in fact not even equal to) the `x` in the definition.
 
 Besides perhaps making a point, this accomplished nothing, since we did not refer to `x` in the remainder of the type.
 
@@ -703,7 +813,7 @@ id-for-Nat''' = id
 
 {-
 
-The difference between regular and implicit parameters is purely syntactical.
+There is no difference between regular and implicit parameters beyond the convenience of the syntax.
 
 Just as you can opt in to inference with underscore, you can apply implicit parameters explicitly with curly braces:
 
@@ -719,6 +829,8 @@ id' : {A : Set} -> A -> A
 id' {A} = id-for A
 
 {-
+
+In general we will prefer the implicit syntax for polymorphic Set parameters, as they can almost always be inferred.
 
 Polymorphism over Sets is incredibly useful for defining a wide range of generic functions:
 
@@ -747,9 +859,9 @@ lift op f g x = op (f x) (g x)
 
 {-
 
-While polymorphism is incredibly useful, it has some (rightful) limitations.
+While polymorphism is incredibly useful, it has some (rightful) limitations in Agda.
 
-For one, Sets may be treated as values, but they are not data, and you cannot pattern match on them:
+For one, while Sets may be treated as values, they are not data, and you cannot pattern match on them:
 
 -}
 
@@ -759,12 +871,6 @@ For one, Sets may be treated as values, but they are not data, and you cannot pa
 -- bad-id-for Other x = x
 
 {-
-
-If you comment in the above definition, Agda treats Nat and Bool (and Other) as fresh variable names, not patterns.
-
-These variable names shadow the previously defined Nat and Bool, and are the same as the `A` from the type signature.
-
-Since `suc` and `not` only work on a `Nat` or `Bool` respectively, and not with any arbitrary `A`, we get a type error.
 
 On top of this restriction, we also may not pattern match on a parameter without knowing its exact datatype:
 
@@ -783,7 +889,7 @@ Parametrically polymorphic functions cannot have differing behavior depending on
 
 This guarantees, for instance, that the identity function is the only function of type `{A : Set} -> A -> A`.
 
-One useful application of parametricity is to encode datatypes like Nat and Bool *as* polymorphic function types:
+One clever use case of parametricity is to encode datatypes like Nat and Bool *as* polymorphic function types:
 
 -}
 
@@ -791,20 +897,20 @@ One useful application of parametricity is to encode datatypes like Nat and Bool
 CBool : Set
 CBool = {X : Set} -> X -> X -> X
 
-cfalse : CBool
-cfalse x y = x
+Cfalse : CBool
+Cfalse x y = x
 
-ctrue : CBool
-ctrue x y = y
+Ctrue : CBool
+Ctrue x y = y
 
-cnot : CBool -> CBool
-cnot f x y = f y x
+Cnot : CBool -> CBool
+Cnot f x y = f y x
 
 {-
 
 Indeed, there really only are two ways to produce an `X` given two `X`s, if you know nothing more about `X`.
 
-Take a moment to convince yourself of this correspondence and that e.g. `cnot cfalse` is equivalent to `ctrue`.
+Take a moment to convince yourself of this correspondence and that e.g. `Cnot Cfalse` is equivalent to `Ctrue`.
 
 With a slightly cleverer polymorphic function type, we can also encode the natural numbers using parametricity:
 
@@ -813,17 +919,17 @@ With a slightly cleverer polymorphic function type, we can also encode the natur
 CNat : Set
 CNat = {X : Set} -> (X -> X) -> X -> X
 
-czero : CNat
-czero f x = x
+Czero : CNat
+Czero f x = x
 
-cone : CNat
-cone f x = f x
+Cone : CNat
+Cone f x = f x
 
-ctwo : CNat
-ctwo f x = f (f x)
+Ctwo : CNat
+Ctwo f x = f (f x)
 
-cthree : CNat
-cthree f x = f (f (f x))
+Cthree : CNat
+Cthree f x = f (f (f x))
 
 {-
 
@@ -845,7 +951,7 @@ We can also prefix either of these commands with "C-u C-u" to force Agda to norm
 
 For example, if "C-c C-." displays "CBool" then "C-u C-u C-c C-." should display "{X : Set} -> X -> X -> X".
 
-Try these commands out on the following exercises:
+Make sure to try these commands out while working on the following exercises:
 
 -}
 
@@ -865,17 +971,17 @@ Try these commands out on the following exercises:
 
 -- Define these functions over church encodings without using any regular, non-church-encoded definitions:
 
--- csuc : CNat -> CNat
--- csuc n f x = ?
+-- Csuc : CNat -> CNat
+-- Csuc n f x = ?
 
--- cand : CBool -> CBool -> CBool
--- cand f g x y = ?
+-- Cand : CBool -> CBool -> CBool
+-- Cand f g x y = ?
 
--- cor : CBool -> CBool -> CBool
--- cor f g x y = ?
+-- Cor : CBool -> CBool -> CBool
+-- Cor f g x y = ?
 
--- cisEven : CNat -> CBool
--- cisEven f x y = ?
+-- CisEven : CNat -> CBool
+-- CisEven f x y = ?
 
 -- Define conversion functions between datatypes and their parametric/church encodings:
 
@@ -907,18 +1013,22 @@ Try these commands out on the following exercises:
 -- warbler : ?
 -- warbler f x = f x x
 
+-- Find some type for this definition which does not result in an error:
+-- apply-to-self : ?
+-- apply-to-self f = f f
+
 -- The church encoding of the natural numbers notably allows us to write the following astonishing definitions:
 
-_c+_ : CNat -> CNat -> CNat
-(n c+ m) f x = n f (m f x)
+_C+_ : CNat -> CNat -> CNat
+(n C+ m) f x = n f (m f x)
 
-_c*_ : CNat -> CNat -> CNat
-(n c* m) f x = n (m f) x
+_C*_ : CNat -> CNat -> CNat
+(n C* m) f x = n (m f) x
 
-_c^_ : CNat -> CNat -> CNat
-(n c^ m) f x = m n f x
+_C^_ : CNat -> CNat -> CNat
+(n C^ m) f x = m n f x
 
--- Take some time to consider why each of these works.
+-- Take some time to consider why each of these works
 -- Also, 0^0 is normally left undefined, but what does `czero c^ czero` equal?
 -- When you think you have the answer, try normalizing the following expression:
 -- _ = {! CNat-to-Nat (czero c^ czero)  !}
@@ -926,29 +1036,43 @@ _c^_ : CNat -> CNat -> CNat
 -- We don't always need to introduce all parameters in order to define a function
 -- Instead we can simply provide a function as output which itself awaits more parameters as input:
 
--- _c^'_ : CNat -> CNat -> CNat
--- n c^' m = m ?
+-- _C^'_ : CNat -> CNat -> CNat
+-- n C^' m = m ?
 
--- _c*'_ : CNat -> CNat -> CNat
--- n c*' m = compose ? ?
+-- _C*'_ : CNat -> CNat -> CNat
+-- n C*' m = compose ? ?
 
--- _c+'_ : CNat -> CNat -> CNat
--- n c+' m = lift ? ? ?
+-- _C+'_ : CNat -> CNat -> CNat
+-- n C+' m = lift ? ? ?
+
+-- Define `CInt`, a church encoding of `Int` in terms of `CNat`, as well as conversion functions to and from Int
+
+-- CInt : Set
+-- CInt = {X : Set} -> ? -> X
+
+-- Int-to-CInt : Int -> CInt
+-- Int-to-CInt = ?
+
+-- CInt-to-Int : CInt -> Int
+-- CInt-to-Int = ?
+
 
 {-
 
 Tips and Tricks:
 
+You can jump to a definition under the cursor with "M-." (i.e. Alt-period) and jump back when you are done with "M-,".
+
 As previously mentioned, holes can be filled in with solutions containing more holes.
 
 For example, you could start to fill in the following definition by writing `op ? ? ?` and pressing C-c C-Space.
 
-However, you could also just write `op` into it, and hit C-c C-r to "refine" the solution.
+However, you could also just write `op` into it, and hit C-c C-r to "refine" the solution:
 
 -}
 
 -- lift3 : {A B C D E : Set} -> (B -> C -> D -> E) -> (A -> B) -> (A -> C) -> (A -> D) -> A -> E
--- lift3 op f g h x = {! op !}
+-- lift3 op f g h x = ?
 
 {-
 
@@ -956,19 +1080,23 @@ Challenge Exercises:
 
 -}
 
--- Find some type for this definition which does not result in an error:
--- apply-to-self : ?
--- apply-to-self f = f f
+-- >:)
+-- insanity : {X Y : Set} -> ({A B : Set} -> (({C : Set} -> A -> C) -> B) -> (A -> B) -> B) -> ((X -> Y) -> X) -> X
+-- insanity f g = ?
+
+-- Define a minus function for the natural numbers using only church encoded definitions
+-- To do this you will need to define additional types via parametric polymorphism
+-- _C-_ : CNat -> CNat -> CNat
+-- (n C- m) f x = ?
 
 -- The previously defined `s` and `k` functions, also called "combinators", together are turing complete
--- With enough work, any higher-order function can be written without introducing parameters, purely in terms of s and k
+-- With enough work, any polymorphic function can be written without introducing parameters, purely in terms of s and k
 -- Define the following functions using only s and k, without introducing any parameters (aside from type parameters)
 -- It may be helpful to define and use helper functions using only s and k, and substitute them in afterwards
--- Note that Agda tries to infer all type parameters, even if they are irrelevant, which can lead to constraint errors
--- You therefore may need to explicitly supply implicit type parameters to get Agda to stop complaining
+-- Note that you may need to explicitly provide a few implicit type parameters where Agda cannot infer them
 
--- warbler' : {A B : Set} -> (A -> A -> B) -> A -> B
--- warbler' {A} {B} = ?
+-- flip-k' : {A B : Set} -> A -> B -> B
+-- flip-k' {A} {B} = ?
 
 -- compose' : {A B C : Set} -> (B -> C) -> (A -> B) -> A -> C
 -- compose' {A} {B} {C} = ?
@@ -980,11 +1108,13 @@ Challenge Exercises:
 
 Chapter 4. Algebraic Datatypes
 
-When defining types formally as Sets of values, the number of distinct values inhabiting a type becomes very apparent.
+When we think of types formally as sets of values, the number of distinct values of a type becomes very apparent.
 
-This number, which does not always have to be finite, is referred to as the cardinality of a type/set.
+This number is referred to as the cardinality of a set or type, and is not necessarily always a finite number.
 
-Just as Bool has a cardinality of 2, it is easy to define a type with any finite cardinality we desire:
+For example, while Bool has a cardinality of 2, Nat has an infinite cardinality as there are infinitely many Nats.
+
+It is very easy to define a type with any finite cardinality we desire:
 
 -}
 
@@ -1007,7 +1137,7 @@ data Three : Set where
 
 Once we start thinking of types as "number-like" things, we might wonder if we can add or multiply types.
 
-A programming language with Algebraic Datatypes simply provides us with a convenient way to do exactly this.
+A programming language with "Algebraic Datatypes" simply provides us with a convenient way to do exactly this.
 
 In fact, most languages already make it easy to define products, even if the numeric correspondence is not obvious.
 
@@ -1018,29 +1148,29 @@ In Agda, we can define e.g. the product of Two and Three as follows:
 -}
 
 data Six : Set where
-  mkSix : Two -> Three -> Six
+  sixFromTwoAndThree : Two -> Three -> Six
 
 1/Six : Six
-1/Six = mkSix 1/Two 1/Three
+1/Six = sixFromTwoAndThree 1/Two 1/Three
 
 2/Six : Six
-2/Six = mkSix 1/Two 2/Three
+2/Six = sixFromTwoAndThree 1/Two 2/Three
 
 3/Six : Six
-3/Six = mkSix 1/Two 3/Three
+3/Six = sixFromTwoAndThree 1/Two 3/Three
 
 4/Six : Six
-4/Six = mkSix 2/Two 1/Three
+4/Six = sixFromTwoAndThree 2/Two 1/Three
 
 5/Six : Six
-5/Six = mkSix 2/Two 2/Three
+5/Six = sixFromTwoAndThree 2/Two 2/Three
 
 6/Six : Six
-6/Six = mkSix 2/Two 3/Three
+6/Six = sixFromTwoAndThree 2/Two 3/Three
 
 {-
 
-A pair like this is the cartesian product of its components, whose cardinalities are combined by multiplication.
+Such a pair type is the cartesian product of its components, whose cardinalities are combined by multiplication.
 
 This is no different from the more typical `struct Six { Two x; Three y; };` we would write in an imperative language.
 
@@ -1049,23 +1179,23 @@ While not as common in other languages, sums can also be encoded as variant/enum
 -}
 
 data Five : Set where
-  mkFiveFromTwo : Two -> Five
-  mkFiveFromThree : Three -> Five
+  fiveFromTwo : Two -> Five
+  fiveFromThree : Three -> Five
 
 1/Five : Five
-1/Five = mkFiveFromTwo 1/Two
+1/Five = fiveFromTwo 1/Two
 
 2/Five : Five
-2/Five = mkFiveFromTwo 2/Two
+2/Five = fiveFromTwo 2/Two
 
 3/Five : Five
-3/Five = mkFiveFromThree 1/Three
+3/Five = fiveFromThree 1/Three
 
 4/Five : Five
-4/Five = mkFiveFromThree 2/Three
+4/Five = fiveFromThree 2/Three
 
 5/Five : Five
-5/Five = mkFiveFromThree 3/Three
+5/Five = fiveFromThree 3/Three
 
 {-
 
@@ -1084,7 +1214,7 @@ In Agda, as with every other type we have seen until now, we can define these ge
 
 -- 2-ary tuple, a "product" of its two type arguments:
 data Pair : Set -> Set -> Set where
-  mkPair : {A B : Set} -> A -> B -> Pair A B
+  pair : {A B : Set} -> A -> B -> Pair A B
 
 -- 2-ary variant, a "sum" of its two type arguments
 data Either : Set -> Set -> Set where
@@ -1099,7 +1229,7 @@ This matches up exactly with how _+_ and _*_ are functions accepting two Nats an
 
 If x and y are Nats, then `_+_ x y` is a Nat, and likewise if A and B are Sets, then `Either A B` is a Set.
 
-If we wish, we can use these polymorphic types instead of defining a whole new datatype like we did for Five and Six.
+If we wish, we can use these generic types instead of defining a whole new datatype like we did for Five and Six.
 
 We can demonstrate that these two approaches are the same by constructing a bijection using pattern matching:
 
@@ -1108,22 +1238,24 @@ We can demonstrate that these two approaches are the same by constructing a bije
 -- A bijection between the types `Either Two Three` and `Five`
 
 EitherTwoThree-to-Five : Either Two Three -> Five
-EitherTwoThree-to-Five (left x) = mkFiveFromTwo x
-EitherTwoThree-to-Five (right x) = mkFiveFromThree x
+EitherTwoThree-to-Five (left x) = fiveFromTwo x
+EitherTwoThree-to-Five (right x) = fiveFromThree x
 
 Five-to-EitherTwoThree : Five -> Either Two Three
-Five-to-EitherTwoThree (mkFiveFromTwo x) = left x
-Five-to-EitherTwoThree (mkFiveFromThree x) = right x
+Five-to-EitherTwoThree (fiveFromTwo x) = left x
+Five-to-EitherTwoThree (fiveFromThree x) = right x
 
 -- A bijection between the types `Pair Two Three` and `Six`
 
 PairTwoThree-to-Six : Pair Two Three -> Six
-PairTwoThree-to-Six (mkPair x y) = mkSix x y
+PairTwoThree-to-Six (pair x y) = sixFromTwoAndThree x y
 
 Six-to-PairTwoThree : Six -> Pair Two Three
-Six-to-PairTwoThree (mkSix x y) = mkPair x y
+Six-to-PairTwoThree (sixFromTwoAndThree x y) = pair x y
 
 {-
+
+A bijection between two sets is an exhaustive one-to-one mapping between their elements.
 
 As we do not yet possess the power of theorem proving, it is up to the reader to verify that these are true bijections.
 
@@ -1132,10 +1264,10 @@ For product types, we can also define accessor functions, which are often referr
 -}
 
 fst : {A B : Set} -> Pair A B -> A
-fst (mkPair x y) = x
+fst (pair x y) = x
 
 snd : {A B : Set} -> Pair A B -> B
-snd (mkPair x y) = y
+snd (pair x y) = y
 
 {-
 
@@ -1167,7 +1299,7 @@ The Maybe type lets us express failure in a mathematically pure manner, without 
 
 -}
 
--- A partial predecessor function, which does not wrongly output zero given an input of zero
+-- A partial predecessor function over the natural numbers which does not wrongly output zero given an input of zero
 pred-partial : Nat -> Maybe Nat
 pred-partial zero = nothing
 pred-partial (suc n) = just n
@@ -1230,8 +1362,8 @@ This "singly-linked" definition of a list is very similar to our definition of t
 
 -}
 
-oneToFive : List Nat
-oneToFive = cons 1 (cons 2 (cons 3 (cons 4 (cons 5 nil)))) -- that is, `[1, 2, 3, 4, 5]`
+List-from-one-to-five : List Nat
+List-from-one-to-five = cons 1 (cons 2 (cons 3 (cons 4 (cons 5 nil)))) -- that is, `[1, 2, 3, 4, 5]`
 
 {-
 
@@ -1273,7 +1405,7 @@ All of the types we have defined can be thought of "algebraically" in terms of t
   List A = 1 + A * List A
         nil^     ^cons
 
-Notice how Nat, which has an infinite number of elements, embodies the idea that infinity equals infinity plus one.
+Notice how Nat, which has an infinite cardinality, is defined by being equal to itself plus one.
 
 Furthermore, if datatypes may be thought of as sums and products, a function set may be thought of as an exponentiation.
 
@@ -1296,7 +1428,9 @@ Exercises:
 
 -}
 
--- Complete the following definitions which demonstrate the algebraic law of commutativity for sums and products
+-- We can informally demonstrate algebraic laws by defining bijections involving algebraic data types.
+
+-- Complete the following definitions which demonstrate the algebraic law of commutativity for sum and product types
 
 -- a * b = b * a
 -- swapPair : {A B : Set} -> Pair A B -> Pair B A
@@ -1330,6 +1464,15 @@ Exercises:
 -- undistribute : ?
 -- undistribute = ?
 
+-- Complete the following definitions which would almost appear to demonstrate an invalid algebraic law
+-- Consider what this law would be, and how its invalidity will inevitably be reflected in any solution
+
+-- split : {A B C : Set} -> Either A (Pair B C) -> Pair (Either A B) (Either A C)
+-- split = ?
+
+-- unsplit : {A B C : Set} -> Pair (Either A B) (Either A C) -> Either A (Pair B C)
+-- unsplit = ?
+
 -- Define the following functions which use Maybe and List
 
 -- A partial minus function for natural numbers, which fails rather than returning zero in place of a negative number
@@ -1352,12 +1495,26 @@ Exercises:
 -- flatten : {A : Set} -> List (List A) -> List A
 -- flatten xs = ?
 
--- Turn a list of pairs into two lists
--- unzip : {A B : Set} -> List (Pair A B) -> Pair (List A) (List B)
--- unzip xs = ?
+-- We can define the type of equality comparison operations as follows:
+BEQ : Set -> Set
+BEQ A = A -> A -> Bool
 
--- Traditionally, we define multiplication as a repeated addition, and exponentiation as a repeated multiplication.
--- Yet bizarrely, parametric polymorphism lets us to define both addition and multiplication in terms of exponentiation:
+-- Define operations to lift equality comparisons over types A and B into equality comparisons for generic types
+
+-- Pair-eq : {A B : Set} -> BEQ A -> BEQ B -> BEQ (Pair A B)
+-- Pair-eq a-eq b-eq x y = ?
+
+-- Either-eq : {A B : Set} -> BEQ A -> BEQ B -> BEQ (Either A B)
+-- Either-eq a-eq b-eq x y = ?
+
+-- Maybe-eq : {A : Set} -> BEQ A -> BEQ (Maybe A)
+-- Maybe-eq a-eq x y = ?
+
+-- List-eq : {A : Set} -> BEQ A -> BEQ (List A)
+-- List-eq a-eq x y = ?
+
+-- Traditionally, we define multiplication by repeated addition, and exponentiation by repeated multiplication.
+-- Yet bizarrely, parametric polymorphism lets us define both addition and multiplication in terms of exponentiation:
 
 CPair : Set -> Set -> Set
 CPair A B = {X : Set} -> (A -> B -> X) -> X
@@ -1395,8 +1552,6 @@ CEither A B = {X : Set} -> (A -> X) -> (B -> X) -> X
 -- CList-to-List : {A : Set} -> CList A -> List A
 -- CList-to-List f = ?
 
--- Pick out some previous exercises and complete them again with their church encoded equivalents
-
 {-
 
 Tips and Tricks:
@@ -1413,18 +1568,13 @@ Challenges Exercises:
 
 -}
 
--- Compute all prime numbers up until the provided number
--- primesUntil : Nat -> List Nat
--- primesUntil n = ?
-
 -- Compute a list of all subsequences of the provided list
 -- subsequences : {A : Set} -> List A -> List (List A)
 -- subsequences xs = ?
 
--- Sort the given list by the given less-than relation
+-- Sort a list by the given less-than relation
 -- sortBy : {A : Set} -> (A -> A -> Bool) -> List A -> List A
 -- sortBy _isLessThan_ xs = ?
-
 
 {-
 
@@ -1434,7 +1584,7 @@ In classical logic, which is what most people are familiar with from math class,
 
 That is, every proposition in classical mathematics is assumed to either have a proof, or not have a proof.
 
-This is reflected by the boolean Law of the Excluded Middle (often called LEM), which says "forall p, p or not p".
+This is reflected by the boolean Law of the Excluded Middle (often written as "LEM"), which says "forall p, p or not p".
 
 LEM lets us prove the existence of functions whose outputs depend on the truth of any arbitrarily complex proposition.
 
@@ -1502,7 +1652,7 @@ absurd : {X : Set} -> Zero -> X
 
 {-
 
-With a trivially empty type like Zero, we can prove this by pattern matching on "all" zero of its constructor cases:
+With a trivially empty type like Zero, we can do this by pattern matching on all zero of its constructor cases:
 
 -}
 
@@ -1513,6 +1663,8 @@ absurd ()
 The `()` is called a refutation pattern, and states that we do not need to give an output as there can be no input.
 
 There is always exactly one function from the empty set to any other set, namely one mapping all zero inputs to outputs.
+
+Evidence of Zero simply cannot exist, since it would let us summon evidence of any other proposition, which is absurd.
 
 At this point, one might notice that function sets correspond exactly to implications when interpreted as propositions:
 
@@ -1544,22 +1696,22 @@ With the same trick, products and sums as defined previously over types de-gener
 
 -}
 
--- `n * m is nonzero` if and only if `n is nonzero and m is nonzero`
+-- `n times m is nonzero` if and only if `n is nonzero *and* m is nonzero`
 -- Therefore `Pair N M` is inhabited if and only if `N` is inhabited *and* `M` is inhabited
 
 true-and-true : Pair One One
-true-and-true = mkPair 1/One 1/One
+true-and-true = pair 1/One 1/One
 
 false-and-true-is-absurd : {X : Set} -> Pair Zero One -> X
-false-and-true-is-absurd (mkPair () x)
+false-and-true-is-absurd (pair () x)
 
 true-and-false-is-absurd : {X : Set} -> Pair One Zero -> X
-true-and-false-is-absurd (mkPair x ())
+true-and-false-is-absurd (pair x ())
 
 false-and-false-is-absurd : {X : Set} -> Pair Zero Zero -> X
-false-and-false-is-absurd (mkPair () ())
+false-and-false-is-absurd (pair () ())
 
--- `n + m is nonzero` if and only if `n is nonzero or m is nonzero`
+-- `n plus m is nonzero` if and only if `n is nonzero *or* m is nonzero`
 -- Therefore `Either N M` is inhabited if and only if `N` is inhabited *or* `M` is inhabited
 
 true-or-true : Either One One
@@ -1593,8 +1745,12 @@ A consequence of this principle is that one false proposition is just as useful 
 
 -}
 
-False-propositions-imply-each-other : {A B : Set} -> IsFalse A -> IsFalse B -> A -> B
-False-propositions-imply-each-other a-is-false _ a = a-is-false a
+False-propositions-imply-each-other : {A B : Set} -> IsFalse A -> IsFalse B -> Pair (A -> B) (B -> A)
+False-propositions-imply-each-other {A} {B} a-is-false b-is-false = pair a-to-b b-to-a
+  where a-to-b : A -> B
+        a-to-b a = a-is-false {B} a
+        b-to-a : B -> A
+        b-to-a b = b-is-false {A} b
 
 {-
 
@@ -1606,6 +1762,9 @@ false-or-false-is-false : Either Zero Zero -> Zero
 false-or-false-is-false (left ())
 false-or-false-is-false (right ())
 
+true-and-false-is-false : Pair One Zero -> Zero
+true-and-false-is-false (pair _ ())
+
 {-
 
 Picking a default false proposition to use instead of using the principle of explosion is generally more convenient.
@@ -1614,12 +1773,16 @@ Aside from the type being more concise, this lets us write many disproofs more d
 
 -}
 
-true-and-false-is-false : Pair One Zero -> Zero
-true-and-false-is-false x = snd x
+false-or-false-is-false' : Either Zero Zero -> Zero
+false-or-false-is-false' (left x) = x
+false-or-false-is-false' (right y) = y
+
+true-and-false-is-false' : Pair One Zero -> Zero
+true-and-false-is-false' x = snd x
 
 {-
 
-Just as one can define the function `not : Bool -> Bool` as `not x = x => false`, we can define negation over types as:
+Just as `not : Bool -> Bool` could be defined as `not x = x => false`, we can define negation over types like:
 
 -}
 
@@ -1664,7 +1827,7 @@ While this is obvious classically, where propositions are just booleans, it is n
 
 {-
 
-An attempt to fill this definition quickly makes it clear that we have no basis upon which to compute an answer.
+An attempt to fill this definition will quickly make it clear that we have no basis upon which to compute an answer.
 
 Even if you could somehow inspect the concrete definition of A, you would at best be up against the halting problem.
 
@@ -1702,7 +1865,8 @@ That is, impossible unless you can magically summon a proof or disproof out of n
 
 -}
 
-LEM-to-DNE : LEM -> DNE
+
+LEM-to-DNE : LEM -> DNE -- written out this reads: ({A : Set} -> Either A (Not A)) -> {A : Set} -> Not (Not A) -> A
 LEM-to-DNE lem {A} not-not-a = h (lem {A})
   where
     h : Either A (Not A) -> A
@@ -1711,9 +1875,11 @@ LEM-to-DNE lem {A} not-not-a = h (lem {A})
 
 {-
 
-Here, we first invoke LEM with `A` to prove `Either A (Not A)`.
+LEM-to-DNE assumes `lem : LEM` and the inputs `{A : Set}` and `Not (Not a)` from DNE to prove the output `A` of `DNE`.
 
-Since DNE assumes `Not (Not A)`, we know that LEM will output `left`, with a proof of A.
+To do this we invoke lem (which itself is a polymorphic function) with the type `A` to prove `Either A (Not A)`.
+
+Since DNE assumes `Not (Not A)` (i.e. the input `not-not-a`), we know that LEM will output `left`, with a proof of A.
 
 If LEM were to output `right` with a proof of `Not A`, then this would contradict our assumption of `Not (Not A)`.
 
@@ -1732,26 +1898,284 @@ Notice how the lack of computational feasibility is cleanly carried over from on
 
 Exercises:
 
-todo:
-  Prove that there is no total function "Either A B -> A" or "A -> Pair A B"
-  CZero and COne
-  peirces law aka callcc (or maybe save this for later)
-  (¬X → X) ≅ ¬¬X
-  _<->_
+While completing these exercises, consider how your definitions can be read as logical proofs.
 
 -}
 
--- What definitions from Chapter 3 can be understood as corresponding to laws of logical implication?
--- How can we interpret the various algebraic laws from Chapter 4 as logical laws?
--- What logical laws involving `Zero` cannot be mapped to corresponding algebraic laws?
--- Why are these laws not problematic alongside our algebraic interpretation of types?
+-- a-to-not-not-a : {A : Set} -> A -> Not (Not A)
+-- a-to-not-not-a a not-a = ?
 
+-- not-not-a-to-not-a-implies-a : {A : Set} -> Not (Not A) -> Not A -> A
+-- not-not-a-to-not-a-implies-a not-not-a not-a = ?
+
+-- dne-for-negations : {A : Set} -> Not (Not (Not A)) -> Not A
+-- dne-for-negations not-not-not-a a = ?
+
+-- a-or-b-to-not-a-implies-b : {A B : Set} -> Either A B -> Not A -> B
+-- a-or-b-to-not-a-implies-b a-or-b not-a = ?
+
+-- not-a-implies-b-to-not-not-a-or-b : {A B : Set} -> (Not A -> B) -> Not (Not (Either A B))
+-- not-a-implies-b-to-not-not-a-or-b not-a-implies-b not-a-or-b = ?
+
+-- Complete the following definitions involving input parameters which are polymorphic functions
+
+-- classically-not-a-implies-b-to-a-or-b : {A B : Set} -> LEM -> (Not A -> B) -> Either A B
+-- classically-not-a-implies-b-to-a-or-b lem not-a-implies-b = ?
+
+-- a-or-b-implies-a-is-false : Not ({A B : Set} -> Either A B -> A)
+-- a-or-b-implies-a-is-false a-or-b-implies-a = ?
+
+-- a-implies-a-and-b-is-false : Not ({A B : Set} -> A -> Pair A B)
+-- a-implies-a-and-b-is-false a-implies-a-and-b = ?
+
+-- not-not-a-or-b-to-a-or-b-is-classical : ({A B : Set} -> Not (Not (Either A B)) -> Either A B) -> DNE
+-- not-not-a-or-b-to-a-or-b-is-classical not-not-a-or-b-to-a-or-b = ?
+
+-- not-a-implies-b-to-a-or-b-is-classical : ({A B : Set} -> (Not A -> B) -> Either A B) -> DNE
+-- not-a-implies-b-to-a-or-b-is-classical = ?
+
+-- Define the parametric encodings of Zero and One
+
+-- CZero : Set
+-- CZero = {X : Set} -> ?
+
+-- COne : Set
+-- COne = {X : Set} -> ?
+
+-- Define the following variant of propositional `or` such that the following definitions can be filled in
+
+-- Par : Set -> Set -> Set
+-- Par A B = Pair (? -> A) (? -> B)
+
+-- either-to-par : {A B : Set} -> Either A B -> Par A B
+-- either-to-par either-a-b = ?
+
+-- par-to-not-not-either : {A B : Set} -> Par A B -> Not (Not (Either A B))
+-- par-to-not-not-either par-a-b = ?
+
+-- par-lem-to-either-lem : ({A : Set} -> Par A (Not A)) -> LEM
+-- par-lem-to-either-lem par-lem = ?
+
+-- Consider how `Not A` is a special case of `A -> X`
+-- Many proofs involving implications de-generalize into proofs about negations
+-- Fill in the missing type annotations:
+
+-- not-false : Not Zero
+-- not-false = id {?}
+
+-- not-b-to-a-implies-b-to-not-a : {A B : Set} -> Not B -> (A -> B) -> Not A
+-- not-b-to-a-implies-b-to-not-a {A} {B} = compose {?} {?} {?}
+
+-- Consider how definitions from Chapter 3 can be understood as corresponding to laws of logical implication
+-- Find the exercises from Chapter 3 which degeneralize into the following exercises and use them as solutions
+
+-- false-to-not-a : {A : Set} -> Zero -> Not A
+-- false-to-not-a = ?
+
+-- not-a-to-not-a : {A : Set} -> Not A -> Not A
+-- not-a-to-not-a = ?
+
+-- a-implies-not-a-to-not-a : {A : Set} -> (A -> Not A) -> Not A
+-- a-implies-not-a-to-not-a = ?
+
+-- a-implies-not-b-to-b-implies-not-a : {A : Set} -> (A -> Not B) -> B -> Not A
+-- a-implies-not-b-to-b-implies-not-a = ?
+
+-- not-a-implies-a-to-not-not-a : {A : Set} -> (Not A -> A) -> Not (Not A)
+-- not-a-implies-a-to-not-not-a = ?
+
+-- Consider how we can interpret the various algebraic laws from Chapter 4 as logical laws
+-- Find the exercises from Chapter 4 which degeneralize into the following exercises and use them as solutions
+
+-- todo:
+-- Pair (Not A) (Not B) -> Not (Either A B) -- either
+-- Not (Either A B) -> Pair (Not A) (Not B) -- uneither
+
+-- What logical laws involving `Zero` cannot be mapped to corresponding algebraic laws?
+-- Why are these laws not necessarily inconsistent with our algebraic interpretation of types?
 
 {-
 
 Tips and Tricks:
 
-Don't be afraid to create a throwaway hole to normalize some type aliases
+Don't be afraid to create a throwaway hole to normalize some type aliases.
+
+In Emacs, you can search forwards and backwards for text with C-s and C-r respectively.
+
+After finding an initial match, pressing C-s and C-r again will take you to any next and previous matches respectively.
+
+Challenge Exercises:
+
+-}
+
+-- DNE-to-LEM : DNE -> LEM
+-- DNE-to-LEM dne {A} = ?
+
+-- It is easy to move a double negation from the outside to the inside of a universal quantification
+-- However, going in the opposite direction is not so easy and is known as a double negation shift:
+DNS : Set
+DNS = {P : Set -> Set} -> ({X : Set} -> Not (Not (P X))) -> Not (Not ({X : Set} -> P X))
+
+-- DNS is an example of a classical principle which is weaker than LEM
+-- Show that it is equivalent to the double negation of LEM
+
+-- not-not-lem-to-dns : Not (Not LEM) -> DNS
+-- not-not-lem-to-dns not-not-lem forall-x-not-not-p-of-x not-forall-x-p-of-x = ?
+
+-- dns-to-not-not-lem : DNS -> Not (Not LEM)
+-- dns-to-not-not-lem dns not-lem = ?
+
+{-
+
+Chapter 6. Dependent Types
+
+It is very convenient in Agda that types are treated just like values, allowing us to define type aliases as functions:
+
+-}
+
+_<->_ : Set -> Set -> Set
+A <-> B = Pair (A -> B) (B -> A)
+
+{-
+
+This definition of propositional bi-implication perfectly mirrors the following definition of boolean bi-implication:
+
+-}
+
+-- _<=>_ : Bool -> Bool -> Bool
+-- a <=> b = (a => b) && (b => a)
+
+{-
+
+While this is neat, it is only the first step toward a language feature which is orders of magnitude more powerful.
+
+A language with "Dependent Types" allows us to fluidly bridge the gap between values and types:
+
+-}
+
+-- `Vec` is a list type parameterized by a length, so `Vec n A` is a list of exactly `n` `A`s.
+Vec : Nat -> Set -> Set
+Vec zero A = One
+Vec (suc n) A = Pair A (Vec n A)
+
+{-
+
+`Vec` is just a function which computes a type from a value, and resembles the following definition of exponentiation:
+
+-}
+
+-- _^_ : Nat -> Nat -> Nat
+-- a ^ zero = one
+-- a ^ (suc n) = a * (a ^ n)
+
+{-
+
+Functions from values to types may be used like type aliases and will be normalized during type checking:
+
+-}
+
+-- This should look very similar to List-from-one-to-five from Chapter 4.
+Vec-from-one-to-five : Vec 5 Nat
+Vec-from-one-to-five = pair 1 (pair 2 (pair 3 (pair 4 (pair 5 1/One))))
+
+-- Use "C-c C-n" in the following hole to see the fully written out type of Vec-from-one-to-five
+-- _ = {! Vec 5 Nat  !}
+
+-- The following two variants will not type check:
+
+-- Bad-Vec-from-one-to-five : Vec 6 Nat
+-- Bad-Vec-from-one-to-five = pair 1 (pair 2 (pair 3 (pair 4 (pair 5 1/One))))
+
+-- Bad-Vec-from-one-to-five : Vec 4 Nat
+-- Bad-Vec-from-one-to-five = pair 1 (pair 2 (pair 3 (pair 4 (pair 5 1/One))))
+
+{-
+
+The ability to compute types from values like this is not particularly rare in modern programming languages.
+
+Dependently typed programming languages stand out by letting us describe types in terms of *variable* input values.
+
+We have arguably already been doing this by describing types in terms of named variable inputs of type Set.
+
+However, if we can compute Sets from values, then we can also name e.g. Nat inputs and use them in the remaining type:
+
+-}
+
+prepend-to-Vec : {A : Set} {n : Nat} -> Vec n A -> A -> Vec (suc n) A
+prepend-to-Vec xs x = pair x xs
+
+-- "C-c C-." to display the inferred type of the given expression
+_ = {! prepend-to-Vec Vec-from-one-to-five 0  !}
+
+{-
+
+When prepending an element to a tuple of length `n`, the resulting tuple should of course have a length of `n + 1`.
+
+While it may seem intuitive that the type of `prepend-to-Vec` is correct, it is not obvious that it should type check.
+
+In particular, the type checker must use the the "definitional" equality `Vec (suc n) A = Pair A (Vec n A)`.
+
+During type checking, Agda will aggressively apply definitional equalities to reduce types where necessary.
+
+While checking prepend-to-Vec, Agda reduces its type to `{n : Nat} {A : Set} -> Vec n A -> A -> Pair A (Vec n A)`.
+
+More complex definitions operating on dependent types often involve so-called "dependent pattern matching":
+
+-}
+
+concat-Vecs : {A : Set} {n m : Nat} -> Vec n A -> Vec m A -> Vec (n + m) A
+concat-Vecs {_} {zero} {_} 1/One ys = ys
+concat-Vecs {_} {suc n'} {_} (pair x xs) ys = pair x (concat-Vecs xs ys)
+
+{-
+
+When pattern matching on an input which the output type depends on, Agda's type checker will refine the output type.
+
+In the `n = zero` case, the remaining type is `{m : Nat} {A : Set} -> Vec zero A -> Vec m A -> Vec (zero + m) A`.
+
+Since we defined `zero + m = m`, Agda can reduce this down to `{m : Nat} {A : Set} -> One -> Vec m A -> Vec m A`.
+
+After this reduction it becomes entirely trivial for Agda to see that `concat-Vecs ... ys = ys` should type check.
+
+In the `n = suc n'` case, we get `{m : Nat} {A : Set} -> Vec (suc n') A -> Vec m A -> Vec (suc n' + m) A`.
+
+Here Agda uses the definitional equalities `suc n' + m = `suc (n' + m)` and `Vec (suc n) A = Pair A (Vec n A)`.
+
+The resulting type from this is `{m : Nat} {A : Set} -> Pair A (Vec n' A) -> Vec m A -> Pair A (Vec (n' + m) A)`.
+
+The recursive call to concat-Vecs then operates on a `Vec n' A` and `Vec m' A` producing a `Vec (n' + m) A`.
+
+Finally, `pair` is applied to an `A` and a `Vec (n' + m) A`, producing the required `Pair A (Vec (n' + m))`.
+
+Many programming languages allow for similar code which works for a finite number of inputs known all at compiletime.
+
+Such a language is only able to reduce types individually for each set of concrete, constant-at-compiletime inputs.
+
+Agda does not impose this restriction, and instead uses equational reasoning to check types containing variable inputs.
+
+While this is much more powerful, computing with variables is entirely non-trivial, unlike computing with constants.
+
+If we so much as flip the `n + m` around to `m + n`, Agda suddenly fails to reduce `m + zero` and `m + (suc n')`:
+
+-}
+
+-- bad-concat-Vecs : {A : Set} {n m : Nat} -> Vec n A -> Vec m A -> Vec (m + n) A
+-- bad-concat-Vecs {_} {zero} {_} 1/One ys = ys
+-- bad-concat-Vecs {_} {suc n'} {_} (pair x xs) ys = pair x (bad-concat-Vecs xs ys)
+
+{-
+
+While the reader may find it obvious that `m + zero = m` and `m + (suc n') = suc (m + n')`, Agda's typechecker does not.
+
+Agda only knows the two definitional equalities we gave for `_+_`, and will only use these during type checking.
+
+So while Agda sees that `ys` is of type `Vec m A`, it cannot see that this is the same as `Vec (m + zero) A`.
+
+Similarly, `pair x (bad-concat-Vecs xs ys)` has the type `Pair A (Vec (m + n') A)`, not `Vec (m + suc n') A`.
+
+In general, meticulously defining everything so that type checking happens to work out is not always a viable strategy.
+
+Luckily, with dependent pattern matching we can separately prove any lemma that we might need, and apply it explicitly.
 
 -}
 
@@ -1761,11 +2185,17 @@ Challenge Exercises:
 
 -}
 
--- DNE-to-LEM : DNE -> LEM
--- DNE-to-LEM dne {A} = ?
+-- Tuple : (n : Nat) -> ?
 
 {-
 
-Chapter 6. Dependent Types
+todo:
+Is-true : Bool -> Set
+
+Reminder: variable names used to bind inputs in a type signature are named independently from those in the definition
+
+Either (Not A) (Not B) -> Not (Pair A B)
+	Either (A -> C) (B -> C) -> Pair A B -> C
+Not (Pair A B) -> Either (Not A) (Not B)
 
 -}
