@@ -1,6 +1,6 @@
 # An Introduction to Intuitionistic Mathematics
 
-This repo contains a single-file, exercise-focused tutorial on formal theorem proving with Intuitionistic Mathematics, [AnIntroductionToIntuitionisticMathematics.agda](AnIntroductionToIntuitionisticMathematics.agda).
+This repo contains a single-file tutorial and collection of exercises on formal theorem proving with Intuitionistic Mathematics, [AnIntroductionToIntuitionisticMathematics.agda](AnIntroductionToIntuitionisticMathematics.agda).
 
 By downloading it and filling out the exercises, you will learn how to write programs and formal proofs in the programming language and proof assistant Agda.
 
@@ -15,6 +15,7 @@ Learning to formally state and prove propositions about programs and other mathe
 - Setting up Agda in Emacs
 - Loading the file with "C-c C-l"
 - Adjusting font size with "C-c C-+", "C-c C--"
+- Canceling commands with "C-g" or "<ESC><ESC><ESC>"
 ### Part 1. Pure Functional Programming
 - Purity and totality
 #### Chapter 1. Booleans
@@ -22,27 +23,36 @@ Learning to formally state and prove propositions about programs and other mathe
 - Commenting code in and out with "C-x C-;"
 - Filling in holes with "C-c C-Space"
 - Testing code with "C-c C-n"
+- Managing multiple windows with "C-x <n>"
 #### Chapter 2. Natural Numbers
 - Structural recursion
 - BUILTIN-pragmas
 - Assisted pattern matching with "C-c C-c"
 - Jumping between holes with "C-c C-f" and "C-c C-b"
+- Declaring custom operator precedence and associativity
 #### Chapter 3. Parametric Polymorphism
-- Explicit and implicit named parameters in types
+- (explicit) and {implicit} named parameters in types
 - Parametric/Church encodings
 - Inspecting types with "C-c C-,", "C-c C-.", and "C-u C-u ..."
+- Jumping to a definition with "M-."
 - Refining a solution with "C-c C-r"
 #### Chapter 4. Algebraic Datatypes
 - Sum and product types
 - Generic datatypes
 - Defining helper functions with "where" clauses
 - Exponential types
+- Discovering key-combos with "C-h m", "C-h t"
 ### Part 2. Constructive Theorem Proving
 - Intuitionistic vs classical logic
 #### Chapter 5. Intuitionistic Propositions
 - Provable and refutable types
-- Propositional "and", "or", "implies", and "forall"
-- The principle of explosion and propositional negation
+- Propositional "and", "or", "implies", "forall", and "not"
+- The principle of explosion
 - The law of the excluded middle and double negation elimination
+- Searching forwards and backwards with "C-s", "C-r"
 #### Chapter 6. Dependent Types
-
+- Computing types from values
+- Definitional equalities and dependent pattern matching
+- Displaying unnormalized types with "C-u ..."
+- Induction
+- Type annotations and solving for types with "C-c C-s"
