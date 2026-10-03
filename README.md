@@ -34,7 +34,7 @@ Learning to formally state and prove propositions about programs and other mathe
 - (explicit) and {implicit} named parameters in types
 - Parametric/Church encodings
 - Inspecting types with "C-c C-,", "C-c C-.", and "C-u C-u ..."
-- Jumping to a definition with "M-."
+- Jumping to a definition with "M-." and back with "M-,"
 - Refining a solution with "C-c C-r"
 #### Chapter 4. Algebraic Datatypes
 - Sum and product types
@@ -53,6 +53,6 @@ Learning to formally state and prove propositions about programs and other mathe
 #### Chapter 6. Dependent Types
 - Computing types from values
 - Definitional equalities and dependent pattern matching
+- Induction and substitution
 - Displaying unnormalized types with "C-u ..."
-- Induction
 - Type annotations and solving for types with "C-c C-s"

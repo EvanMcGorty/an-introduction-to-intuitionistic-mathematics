@@ -8,7 +8,7 @@ Preface.
 
 Intuitionistic Mathematics is an art of constructing formal proofs which are well defined mathematical objects.
 
-Proofs may be seen as programs or data, and propositions may be seen accordingly as properties of said programs or data.
+Programs and data may be seen mathematically as proofs of propositions about other programs or data.
 
 With enough work, we can formalize all of mathematics as typed code which can be formally verified by a type checker.
 
@@ -125,7 +125,7 @@ The last case gives the impression that `xor false x` is always equal to `false`
 
 However, it overlaps with the previous case, and therefore only holds if the inputs do not match `false true`.
 
-Agda's syntax highlighting colors this case to indicate that it overlaps with previous cases and is not a true equality.
+Agda even highlights this case to indicate that it overlaps with previous cases and might not be a true equality.
 
 Naturally, functions may also be defined in terms of other previously defined functions:
 
@@ -159,7 +159,7 @@ It can be useful to comment out code which we don't want Agda to load, e.g. beca
 
 By selecting lines of code and hitting "C-x C-;" (Ctrl-x Ctrl-semicolon), you can easily comment them out or back in.
 
-Try temporarily commenting bad-xor back in and reloading with C-c C-l to see what kind of error you get.
+Try temporarily commenting `bad-xor` back in and reloading with C-c C-l to see what kind of error you get.
 
 Note that Agda lets us to use nearly any character as part of a name, including `-`, `'`, and even unicode characters.
 
@@ -178,21 +178,21 @@ This defines a synonym for `and` called `_&&_`, where `l && r` carries the same 
 
 We could have just as well written "_&&_ l r = and l r" for the definition, as there is absolutely no difference.
 
-Note that the whitespace between each symbol is mandatory, and "l&&r" would be parsed as a singular, unrelated symbol.
+Note that the whitespace between each symbol is mandatory, as "l&&r" would be parsed as a singular, unrelated symbol.
 
 Another useful thing we can do in Agda is define "higher order functions" which accept other functions as inputs:
 
 -}
 
--- Tells you whether the provided function outputs true for any input
+-- Tells you whether the provided function outputs true for all inputs
 always-outputs-true : (Bool -> Bool) -> Bool
 always-outputs-true f = f false && f true
 
 {-
 
-Notice that we need to wrap the `Bool -> Bool` argument in parentheses, since `->` is not left-associative.
+Notice that we need to wrap the `Bool -> Bool` input type in parentheses, since `->` is not left-associative.
 
-Not only are functions treated as first class values in Agda, but types are as well, allowing us to define type aliases:
+Not only are functions treated as first class values in Agda, but so are types, allowing us to define type aliases:
 
 -}
 
@@ -204,9 +204,9 @@ always-outputs-false f = not (f false) && not (f true)
 
 {-
 
-BoolToBool is a regular definition, but it has the type Set, and can be used anywhere where a Set can be used.
+`BoolToBool` is a regular definition, but it has the type Set, and can be used anywhere where a Set can be used.
 
-When used in a type signature, Agda will happily substitute in the definition of BoolToBool before type checking.
+When used in a type signature, Agda will happily substitute in the definition of `BoolToBool` before type checking.
 
 Exercises:
 
@@ -248,7 +248,7 @@ If you rename an input variable and try to use it to fill in a hole without relo
 
 This tutorial contains an excess of exercises, so complete whatever interests you before moving on to the next chapter.
 
-If you get stuck on or lose interest in an exercise, it is best to just skip it and try again later.
+If you get stuck on or lose interest in an exercise, just skip it since you can always come back to it later.
 
 -}
 
@@ -968,7 +968,7 @@ if false then x else y = y
 
 applyNTimes : {A : Set} -> Nat -> (A -> A) -> A -> A
 applyNTimes zero f x = x
-applyNTimes (suc n) f x = f (applyNTimes n f x)
+applyNTimes (suc n) f x = applyNTimes n f (f x)
 
 {-
 
@@ -1526,7 +1526,7 @@ data Maybe : Set -> Set where
 
 {-
 
-The Maybe type lets us express failure in a mathematically pure manner, without crashing or throwing any exceptions:
+The Maybe type lets us express failure in a mathematically pure manner, without any crashing or throwing exceptions:
 
 -}
 
@@ -1706,21 +1706,29 @@ Exercises:
 
 -- Ex4.6: Define the following functions involving Maybe and List
 
--- A partial minus function for natural numbers, which fails rather than returning zero in place of a negative number
--- minus-partial : Nat -> Nat -> Maybe Nat
--- minus-partial n m = ?
-
--- Take the first Maybe which contains a value
--- _orElse_ : {A : Set} -> Maybe A -> Maybe A -> Maybe A
--- x orElse y = ?
+-- Determine whether the input is `none`
+-- isEmpty : {A : Set} -> Maybe A -> Bool
+-- isEmpty x = ?
 
 -- Determine whether a Maybe contains a value for which the given predicate holds
 -- contains : {A : Set} -> (A -> Bool) -> Maybe A -> Bool
 -- contains f ma = ?
 
+-- Take the first Maybe which contains a value
+-- _orElse_ : {A : Set} -> Maybe A -> Maybe A -> Maybe A
+-- x orElse y = ?
+
+-- A partial minus function for natural numbers, which fails rather than returning zero in place of a negative number
+-- minus-partial : Nat -> Nat -> Maybe Nat
+-- minus-partial n m = ?
+
 -- Get the nth element of a list
 -- index : {A : Set} -> Nat -> List A -> Maybe A
 -- index n xs = ?
+
+-- Determine whether the given predicate holds for every element of a List
+-- all : {A : Set} -> (A -> Bool) -> List A -> Bool
+-- all p xs = ?
 
 -- Map an operation over every element in a list
 -- map : {A B : Set} -> (A -> B) -> List A -> List B
@@ -1730,29 +1738,25 @@ Exercises:
 -- flatten : {A : Set} -> List (List A) -> List A
 -- flatten xs = ?
 
--- Determine whether the given predicate holds for every element of a List
--- all : {A : Set} -> (A -> Bool) -> List A -> Bool
--- all f xs = ?
-
 -- Ex4.7: Lifting boolean equalities
 
--- We can define the type of equality comparison operations as follows:
-BEQ : Set -> Set
-BEQ A = A -> A -> Bool
+-- We can define the type of binary relations (such as the equality relation) as follows:
+Rel : Set -> Set
+Rel A = A -> A -> Bool
 
 -- Define operations to lift equality comparisons over types A and B into equality comparisons for generic types
 
--- Pair-eq : {A B : Set} -> BEQ A -> BEQ B -> BEQ (Pair A B)
--- Pair-eq a-eq b-eq x y = ?
+-- eq-Pair : {A B : Set} -> Rel A -> Rel B -> Rel (Pair A B)
+-- eq-Pair eq-A eq-B (pair a1 b1) (pair a2 b2) = ?
 
--- Either-eq : {A B : Set} -> BEQ A -> BEQ B -> BEQ (Either A B)
--- Either-eq a-eq b-eq x y = ?
+-- eq-Either : {A B : Set} -> Rel A -> Rel B -> Rel (Either A B)
+-- eq-Either eq-A eq-B x y = ?
 
--- Maybe-eq : {A : Set} -> BEQ A -> BEQ (Maybe A)
--- Maybe-eq a-eq x y = ?
+-- eq-Maybe : {A : Set} -> Rel A -> Rel (Maybe A)
+-- eq-Maybe eq-A x y = ?
 
--- List-eq : {A : Set} -> BEQ A -> BEQ (List A)
--- List-eq a-eq x y = ?
+-- eq-List : {A : Set} -> Rel A -> Rel (List A)
+-- eq-List eq-A x y = ?
 
 -- Ex4.8: Church encoded sums and products
 
@@ -2245,10 +2249,10 @@ data Zero' : Set where
 -- Ex5.4: Prove the following lemmas involving assumptions which are only valid classically
 
 -- not-not-a-or-b-to-a-or-b-is-classical : ({A B : Set} -> Not (Not (Either A B)) -> Either A B) -> DNE
--- not-not-a-or-b-to-a-or-b-is-classical not-not-a-or-b-to-a-or-b = ?
+-- not-not-a-or-b-to-a-or-b-is-classical not-not-a-or-b-to-a-or-b {C} not-not-c = ?
 
 -- not-a-implies-b-to-a-or-b-is-classical : ({A B : Set} -> (Not A -> B) -> Either A B) -> DNE
--- not-a-implies-b-to-a-or-b-is-classical = ?
+-- not-a-implies-b-to-a-or-b-is-classical not-a-implies-b-to-a-or-b {C} not-not-c = ?
 
 -- Ex5.5: Define the parametric encodings of Zero and One
 
@@ -2258,7 +2262,13 @@ data Zero' : Set where
 -- COne : Set
 -- COne = {X : Set} -> ?
 
--- Ex5.6: Define the following variant of propositional `or` such that the following definitions can be filled in
+-- disproof-of-CZero : Not CZero
+-- disproof-of-CZero x = ?
+
+-- proof-of-COne : COne
+-- proof-of-COne = ?
+
+-- Ex5.6: Complete the definition of `Par` such that the following definitions can be filled in
 
 -- Par : Set -> Set -> Set
 -- Par A B = Pair (? -> A) (? -> B)
@@ -2272,17 +2282,19 @@ data Zero' : Set where
 -- par-lem-to-dne : ({A : Set} -> Par A (Not A)) -> DNE
 -- par-lem-to-dne par-lem = ?
 
--- Ex5.7: Fill in the missing types to show how proofs about implications de-generalize into proofs about negations
-
--- What logical law does the type of `id` correspond to?
+-- Ex5.7: Fill in the missing types
 
 -- not-false : Not Zero
 -- not-false = id {?}
 
--- What logical law does the type of `compose` correspond to?
-
 -- not-b-to-a-implies-b-to-not-a : {A B : Set} -> Not B -> (A -> B) -> Not A
 -- not-b-to-a-implies-b-to-not-a {A} {B} = compose {?} {?} {?}
+
+-- a-and-b-implies-a-or-c : {A B C : Set} -> Pair A B -> Either A C
+-- a-and-b-implies-a-or-c {A} {B} {C} = compose {?} {?} {?} left fst
+
+-- a-implies-a-and-a : {A : Set} -> A -> Pair A A
+-- a-implies-a-and-a {A} = lift {?} {?} {?} {?} pair id id
 
 -- Ex5.8: Find the exercises from chapter 3 which de-generalize into the following lemmas and use them as solutions
 
@@ -2315,11 +2327,27 @@ data Zero' : Set where
 -- not-a-or-b-to-not-a-and-not-b : {A B : Set} -> Not (Either A B) -> Pair (Not A) (Not B)
 -- not-a-or-b-to-not-a-and-not-b = ?
 
--- Ex5.10: Reconciling algebraic and logical interpretations of types
+-- Bonus: why are we able to get away with treating exponentiation as a generalization of implication?
 
--- We have seen that some logical laws involving `Zero`/`Not` are de-generalizations of corresponding algebraic laws
--- What are some logical laws involving `Zero`/`Not` which do *not* correspond like this to any algebraic law?
--- Why are these laws not necessarily inconsistent with our algebraic interpretation of types?
+-- Ex5.10: Prove the following lemmas about universal quantification
+
+-- shift-and-into-forall : {P Q : Set -> Set}
+--                      -> Pair ({X : Set} -> P X) ({X : Set} -> Q X) -> {X : Set} -> Pair (P X) (Q X)
+-- shift-and-into-forall forall-x-p-x-and-forall-x-q-x = ?
+
+-- shift-and-out-of-forall : {P Q : Set -> Set}
+--                        -> ({X : Set} -> Pair (P X) (Q X)) -> Pair ({X : Set} -> P X) ({X : Set} -> Q X)
+-- shift-and-out-of-forall forall-x-p-x-and-q-x = ?
+
+-- shift-or-into-forall : {P Q : Set -> Set}
+--                     -> Either ({X : Set} -> P X) ({X : Set} -> Q X) -> {X : Set} -> Either (P X) (Q X)
+-- shift-or-into-forall forall-x-p-x-or-forall-x-q-x = ?
+
+-- shift-double-negation-into-forall : {P : Set -> Set} -> Not (Not ({X : Set} -> P X)) -> {X : Set} -> Not (Not (P X))
+-- shift-double-negation-into-forall not-not-forall-x-p-x {X} not-p-x = ?
+
+-- {X : Set} -> A -> P X
+-- A -> {X : Set} -> P X
 
 {-
 
@@ -2340,7 +2368,14 @@ Challenge Exercises:
 -- DNE-to-LEM : DNE -> LEM
 -- DNE-to-LEM dne {A} = ?
 
--- Ce5.2: The principle of double negation shift
+-- Ce5.2: Anti-classical universal quantification
+
+-- cant-shift-or-out-of-forall : {P Q : Set -> Set}
+--                            -> (({X : Set} -> Either (P X) (Q X)) -> Either ({X : Set} -> P X) ({X : Set} -> Q X))
+--                            -> Not LEM
+-- cant-shift-or-out-of-forall = ?
+
+-- Ce5.3: The principle of double negation shift
 
 -- It is easy to move a double negation from the outside to the inside of a universal quantification
 -- However, going in the opposite direction is not so easy and is known as a double negation shift:
@@ -2405,7 +2440,7 @@ Functions from values to types may be used like type aliases and will be normali
 
 -}
 
--- This should look very similar to List-from-one-to-five from Chapter 4
+-- This should look very similar to List-from-one-to-five from chapter 4
 Vec-from-one-to-five : Vec 5 Nat
 Vec-from-one-to-five = pair 1 (pair 2 (pair 3 (pair 4 (pair 5 1/One))))
 
@@ -2464,7 +2499,7 @@ When pattern matching on an input which the output type depends on, Agda's type 
 
   In the `n = zero` case, the remaining type becomes `{m : Nat} {A : Set} -> Vec zero A -> Vec m A -> Vec (zero + m) A`.
 
-  Since `Vec zero A = One` and `zero + m = m`, Agda reduces this to `{m : Nat} {A : Set} -> One -> Vec m A -> Vec m A`.
+  Since `zero + m = m` and `Vec zero A = One`, Agda reduces this to `{m : Nat} {A : Set} -> One -> Vec m A -> Vec m A`.
 
   After this reduction it becomes entirely trivial for Agda to see that `concat-Vecs ... ys = ys` should type check.
 
@@ -2552,9 +2587,9 @@ As with `Vec 5 Nat`, this reduction is trivial since it only involves constants,
 
 -}
 
--- for all Nats n and m, (n == m) => (n + 1 == m + 1)
+-- forall n and m, (n == m) => (n + 1 == m + 1)
 n-equals-m-implies-n+1-equals-m+1 : {n m : Nat} -> Id-Nat n m -> Id-Nat (suc n) (suc m)
-n-equals-m-implies-n+1-equals-m+1 n-eq-m = n-eq-m
+n-equals-m-implies-n+1-equals-m+1 n-is-m = n-is-m
 
 {-
 
@@ -2568,6 +2603,7 @@ Previously we observed how Agda cannot see that `n + zero` is equal to `n`, howe
 
 -}
 
+-- forall n, n + 0 == n
 n+0-equals-n : (n : Nat) -> Id-Nat (n + zero) n
 n+0-equals-n zero = 1/One
 n+0-equals-n (suc n') = n+0-equals-n n'
@@ -2588,7 +2624,7 @@ As with `concat-Vecs`, here we are again taking advantage of dependent pattern m
 
   So, since `n'` is structurally smaller than `n`, we can complete the proof recursively with `n+0-equals-n n'`.
 
-This proof "by recursion" can in fact be seen as a proof by the principle of induction over the natural numbers.
+This proof "by recursion" can in fact be seen as a proof by the induction principle of the natural numbers.
 
 Induction says that if `P(0)` holds and `P(n + 1)` holds whenever `P(n)` holds, then P holds for every natural number.
 
@@ -2596,6 +2632,7 @@ We can formalize this more notion of induction by representing predicates with a
 
 -}
 
+-- forall P, P(0) and (forall n, P(n) => P(n + 1)) imply forall m, P(m)
 Nat-induction : (P : Nat -> Set) -> P zero -> ((n : Nat) -> P n -> P (suc n)) -> (m : Nat) -> P m
 Nat-induction P base-case step-case zero = base-case
 Nat-induction P base-case step-case (suc m') = step-case m' (Nat-induction P base-case step-case m')
@@ -2606,7 +2643,7 @@ While the type of `Nat-induction` is tricky, its proof is quite easy--just apply
 
   When `m = zero`, we prove the required `P zero` by `base-case : P zero`.
 
-  When `m = suc m'`, we prove `P m'` by recursion and apply `step-case m' : P m' -> P (suc m')` to prove `P (suc m')`.
+  When `m = suc m'`, we prove `P m'` recursively and apply `step-case m' : P m' -> P (suc m')` to prove `P (suc m')`.
 
 Our proof of `n+0-equals-n` is indeed just the special case of `Nat-induction` where `P n = Id-Nat (n + zero) n`:
 
@@ -2628,7 +2665,7 @@ The types in the base and step cases reduce exactly as they did before, and `Nat
 
 When Agda substitutes the definition of `P` into the type of `Nat-induction`, the remaining parameters' types match up.
 
-This trick of quantifying over dependent types can also be used to state the principle of substitution for equalities.
+This trick of quantifying over dependent types can also be used to state the substitution principle for equalities.
 
 Given an equality `n = m`, substitution should let us turn any proof of `P(n)` into a proof of `P(m)` for any `P`.
 
@@ -2638,12 +2675,13 @@ Again, we will need to quantify over dependent types (or, less generally, logica
 
 -}
 
+-- forall P, n, and m, n == m => (P(n) => P(m))
 Nat-substitution : (P : Nat -> Set) (n m : Nat) -> Id-Nat n m -> P n -> P m
-Nat-substitution P zero zero n-eq-m p-n = p-n
-Nat-substitution P (suc n') (suc m') n-eq-m p-n = recursive-case P' p-n
+Nat-substitution P zero zero n-is-m p-n = p-n
+Nat-substitution P (suc n') (suc m') n-is-m p-n = recursive-case P' p-n
   where
     recursive-case : (Q : Nat -> Set) -> Q n' -> Q m'
-    recursive-case Q = Nat-substitution Q n' m' n-eq-m
+    recursive-case Q = Nat-substitution Q n' m' n-is-m
     P' : Nat -> Set
     P' x = P (suc x)
 
@@ -2678,8 +2716,8 @@ Since we assume `n` and `m` to be equal, Agda lets us omit the remaining two cas
 
 -- Or alternatively:
 
--- Nat-substitution zero (suc _) n-eq-m P = absurd n-eq-m
--- Nat-substitution (suc _) zero n-eq-m P = absurd n-eq-m
+-- Nat-substitution zero (suc _) n-is-m P = absurd n-is-m
+-- Nat-substitution (suc _) zero n-is-m P = absurd n-is-m
 
 {-
 
@@ -2692,7 +2730,7 @@ Finally, lets see substitution in action:
 -}
 
 cast-Vec : {A : Set} {n m : Nat} -> Id-Nat n m -> Vec n A -> Vec m A
-cast-Vec {A} {n} {m} n-eq-m vec = Nat-substitution P n m n-eq-m vec
+cast-Vec {A} {n} {m} n-is-m vec = Nat-substitution P n m n-is-m vec
   where
     P : Nat -> Set
     P x = Vec x A
@@ -2717,7 +2755,7 @@ To force Agda to explicitly avoid any normalization whatsoever, a command can si
 
 -}
 
--- Ex6.1: Prove the following lemmas about your chapter 1 solutions
+-- Ex6.1: Use dependent pattern matching to prove the following lemmas about your chapter 1 solutions
 
 Is-true : Bool -> Set
 Is-true false = Zero
@@ -2766,37 +2804,37 @@ Is-true true = One
 -- Id-Bool : Bool -> Bool -> Set
 -- Id-Bool x y = ?
 
--- not-not-x-is-x : (x : Bool) -> Id-Bool (not (not x)) x
--- not-not-x-is-x x = ?
+-- Id-Bool-reflexivity : (x : Bool) -> Id-Bool x x
+-- Id-Bool-reflexivity x = ?
 
 -- Bool-substitution : (P : Bool -> Set) (x y : Bool) -> Id-Bool x y -> P x -> P y
--- Bool-substitution P x y x-eq-y p-x = ?
+-- Bool-substitution P x y x-is-y p-x = ?
 
--- Prove the following lemmas by substitution by chosing the predicate `Is-true` for `P`
+-- Prove the following lemmas by substitution where `P` is `Is-true`
 
 -- always-true-lemma-1  : (f : Bool -> Bool) -> Id-Bool (f false) (f true) -> Is-true (f false) -> Is-true (f true)
--- always-true-lemma-1 f f-false-eq-f-true f-false-Is-true = Bool-substitution Is-true ? ? ? ?
+-- always-true-lemma-1 f f-false-is-f-true f-false-Is-true = Bool-substitution Is-true ? ? ? ?
 
 -- always-true-lemma-2 : (f : Bool -> Bool) (x : Bool) -> Id-Bool true (f false) -> Id-Bool true (f true) -> Is-true (f x)
--- always-true-lemma-2 f x true-eq-f-false true-eq-f-true = ?
+-- always-true-lemma-2 f x true-is-f-false true-is-f-true = ?
 
 -- Prove the following lemmas by substitution into an appropriately choosen predicate
 
 -- always-true-lemma-3 : (f : Bool -> Bool) -> Id-Bool true (f false) -> Is-true (and (f false) (f false))
--- always-true-lemma-3 f true-eq-f-false = Bool-substitution P ? ? ? ?
+-- always-true-lemma-3 f true-is-f-false = Bool-substitution P ? ? ? ?
 --   where
 --     P : Bool -> Set
 --     P x = ?
 
 -- always-true-lemma-4 : (f : Bool -> Bool) -> Id-Bool true (f false) -> Is-true (or (f false) (f true))
--- always-true-lemma-4 f true-eq-f-false = ?
+-- always-true-lemma-4 f true-is-f-false = ?
 
 -- Prove the following lemmas with multiple consecutive substitutions into appropriately chosen predicates
 -- (tip: write out the individual steps as separate helper definitions and then compose them)
 
 -- always-true-lemma-5 : (f : Bool -> Bool) -> Id-Bool true (f false) -> Id-Bool true (f true)
 --                    -> Is-true (f false && f true)
--- always-true-lemma-5 f true-eq-f-false true-eq-f-true = ?
+-- always-true-lemma-5 f true-is-f-false true-is-f-true = ?
 
 -- Bool-identity-lemma : (f : Bool -> Bool) -> Id-Bool false (f false) -> Id-Bool true (f true)
 --                    -> Is-true (is-the-identity-function f)
@@ -2840,13 +2878,13 @@ Is-true true = One
 -- In fact, when case-splitting with "C-c C-c", even Agda will not make any effort to avoid such ambiguities
 -- Take care to (re-)name your variables appropriately to avoid confusion when looking at Agda's informational window
 
--- Id-Nat-reflexivity : (x : Nat) -> Id-Nat x x
--- Id-Nat-reflexivity x = ?
+-- Nat-reflexivity : (x : Nat) -> Id-Nat x x
+-- Nat-reflexivity x = ?
 
 -- x+suc-y-is-suc-x+y : (x y : Nat) -> Id-Nat (x + suc y) (suc (x + y))
 -- x+suc-y-is-suc-x+y x y = ?
 
--- (tip: when definitional equalities do not suffice, explicitly substitute previously proven equalities)
+-- (tip: when definitional equalities do not suffice, explicitly substitute with previously proven equalities)
 
 -- halfOf-x+x-is-x : (x : Nat) -> Id-Nat x (halfOf (x + x))
 -- halfOf-x+x-is-x x = ?
@@ -2858,14 +2896,14 @@ Is-true true = One
 -- When case splitting with "C-c C-c", Agda automatically omits cases where the type of an input reduces to Zero
 -- Don't take this for granted, and try writing out such cases explicitly with an absurd pattern or with `absurd`
 
--- Id-Nat-symmetry : (x y : Nat) -> Id-Nat x y -> Id-Nat y x
--- Id-Nat-symmetry x y x-eq-y = ?
+-- Nat-symmetry : (x y : Nat) -> Id-Nat x y -> Id-Nat y x
+-- Nat-symmetry x y x-is-y = ?
 
--- Id-Nat-transitivity : (x y z : Nat) -> Id-Nat x y -> Id-Nat y z -> Id-Nat x z
--- Id-Nat-transitivity x y z x-eq-y y-eq-z = ?
+-- Nat-transitivity : (x y z : Nat) -> Id-Nat x y -> Id-Nat y z -> Id-Nat x z
+-- Nat-transitivity x y z x-is-y y-is-z = ?
 
--- Id-Nat-congruence : (x y : Nat) (f : Nat -> Nat) -> Id-Nat x y -> Id-Nat (f x) (f y)
--- Id-Nat-congruence x y x-eq-y = ?
+-- Nat-congruence : (x y : Nat) (f : Nat -> Nat) -> Id-Nat x y -> Id-Nat (f x) (f y)
+-- Nat-congruence x y x-is-y = ?
 
 -- +-commutativity : (x y : Nat) -> Id-Nat (x + y) (y + x)
 -- +-commutativity x y = ?
@@ -2910,52 +2948,154 @@ zero Lte y = One -- 0 is less than or equal to y
 
 -- Ex6.7: Complete the following definitions involving `Vec`s
 
-append : {A : Set} (n : Nat) -> Vec n A -> Vec (suc n) A
-append n xs = ?
+-- append : {A : Set} (n : Nat) -> Vec n A -> Vec (suc n) A
+-- append n xs = ?
 
-zip : {A B : Set} (n : Nat) -> Vec n A -> Vec n B -> Vec n (Pair A B)
-zip n xs ys = ?
+-- zip : {A B : Set} (n : Nat) -> Vec n A -> Vec n B -> Vec n (Pair A B)
+-- zip n xs ys = ?
 
-cartesian-product : {A B : Set} (n m : Nat) -> Vec n A -> Vec m B -> Vec n (Vec m (Pair A B))
-cartesian-product n m xs ys = ?
+-- cartesian-product : {A B : Set} (n m : Nat) -> Vec n A -> Vec m B -> Vec n (Vec m (Pair A B))
+-- cartesian-product n m xs ys = ?
 
-take : {A : Set} (n m : Nat) -> m Lte n -> Vec n A -> Vec m A
-take n m n>=m xs = ?
+-- take : {A : Set} (n m : Nat) -> m Lte n -> Vec n A -> Vec m A
+-- take n m n>=m xs = ?
 
-List-to-Vec : {A : Set} -> (xs : List A) -> Vec (length xs) A
-List-to-Vec xs = ?
+-- index-Vec : {A : Set} {n : Nat} (i : Nat) -> (suc i) Lte n -> Vec n A -> A
+-- index-Vec = ?
 
-Vec-to-List : {A : Set} {n : Nat} -> Vec n A -> List A
-Vec-to-List {n} xs = ?
+-- List-to-Vec : {A : Set} -> (xs : List A) -> Vec (length xs) A
+-- List-to-Vec xs = ?
 
-Vec-to-List-preserves-length : {A : Set} (n : Nat) -> (xs : Vec n A) -> Id-Nat n (length (Vec-to-List xs))
-Vec-to-List-preserves-length n xs = ?
+-- Vec-to-List : {A : Set} {n : Nat} -> Vec n A -> List A
+-- Vec-to-List {n} xs = ?
 
-concat-Vecs' : {A : Set} {n m : Nat} -> Vec n A -> Vec m A -> Vec (m + n) A
-concat-Vecs' {n} {m} xs ys = ?
+-- Vec-to-List-preserves-length : {A : Set} (n : Nat) -> (xs : Vec n A) -> Id-Nat n (length (Vec-to-List xs))
+-- Vec-to-List-preserves-length n xs = ?
 
--- Ex6.8: something about counter examples to universally quantified predicates
+-- concat-Vecs' : {A : Set} {n m : Nat} -> Vec n A -> Vec m A -> Vec (m + n) A
+-- concat-Vecs' {n} {m} xs ys = ?
 
--- todo:
+-- Ex6.8: Prove the following lemmas by picking an appropriate counterexample
 
+-- `pred` is meant to be a "minus one" operation, but this is not entirely true
 -- pred-is-a-lie : Not ((n : Nat) -> Id-Nat n (suc (pred n)))
 -- pred-is-a-lie f = ?
 
--- explore all operations here which are not entirely honest, e.g. halfOf
+-- `halfOf` is similarly not quite a true halving operation
+-- halfOf-is-a-lie : Not ((n : Nat) -> Id-Nat n (halfOf n + halfOf n))
+-- halfOf-is-a-lie f = ?
 
 -- It is impossible to define exponentiation such that both `n^0 = 1` and `0^n = 0` always hold
-exponentiation-anti-lemma : (_^'_ : Nat -> Nat -> Nat) -> Not (Pair ((n : Nat) -> Id-Nat (n ^' 0) 1) ((n : Nat) -> Id-Nat (0 ^' n) 0))
-exponentiation-anti-lemma _^'_ x = ?
+-- exponentiation-anti-lemma : (_^'_ : Nat -> Nat -> Nat)
+--                          -> Not (Pair ((n : Nat) -> Id-Nat (n ^' 0) 1) ((n : Nat) -> Id-Nat (0 ^' n) 0))
+-- exponentiation-anti-lemma _^'_ x = ?
 
--- Ex6.9: induction and equality for Ch4 datatypes
+-- Ex6.9: Complete the given definitions involving algebraic datatypes
 
--- todo:
+-- Prove the following induction principles
 
--- Ex6.10: proofs about Ch4 exercises
+-- Pair-induction : {A B : Set} (P : Pair A B -> Set) -> ((a : A) (b : B) -> P (pair a b)) -> (x : Pair A B) -> P x
+-- Pair-induction P f x = ?
 
--- show that concat-vecs is the same as _++_
+-- Either-induction : {A B : Set} (P : Either A B -> Set)
+--                 -> ((a : A) -> P (left a)) -> ((b : B) -> P (right b)) -> (x : Either A B) -> P x
+-- Either-induction P f g x = ?
 
--- todo:
+-- Maybe-induction : {A : Set} (P : Maybe A -> Set) -> ((a : A) -> P (some a)) -> P none -> (x : Maybe A) -> P x
+-- Maybe-induction P f g x = ?
+
+-- List-induction : {A : Set} (P : List A -> Set) -> ((h : A) (t : List A) -> P (cons h t)) -> P nil -> (x : List A) -> P x
+-- List-induction P f g x = ?
+
+-- Prove the following lemmas about your solutions from chapter 4 exercises
+-- Be sure to practice writing proofs both with pattern matching and in terms of the above induction principles
+
+-- isEmpty-lemma-1 : {A : Set} -> Is-true (isEmpty {A} none)
+-- isEmpty-lemma-1 = ?
+
+-- isEmpty-lemma-2 : {A : Set} (a : A) -> Is-true (not (isEmpty (some a)))
+-- isEmpty-lemma-2 a = ?
+
+-- contains-lemma-1 : {A : Set} (p : A -> Bool) -> Is-true (not (contains p none))
+-- contains-lemma-1 p = ?
+
+-- contains-lemma-2 : {A : Set} (p : A -> Bool) -> (a : A) -> Is-true (p a) -> Is-true (contains p (some a))
+-- contains-lemma-2 p a f-a = ?
+
+-- orElse-lemma-1 : {A : Set} (x y : Maybe A) -> Is-true (isEmpty (x orElse y)) -> Is-true (isEmpty y)
+-- orElse-lemma-1 x y x-orElse-y-isEmpty-y = ?
+
+-- orElse-lemma-2 : {A : Set} (x y : Maybe A) (p : A -> Bool)
+--               -> Is-true (contains p x) -> Is-true (contains p (x orElse y))
+-- orElse-lemma-2 x y p contains-p-x = ?
+
+-- minus-partial-lemma-1 : (n m : Nat) -> suc n Lte m -> Is-true (isEmpty (minus-partial n m))
+-- minus-partial-lemma-1 n m n<m = ?
+
+-- minus-partial-lemma-2 : (n m : Nat) (is-n-minus-m : Nat -> Bool)
+--                      -> ((d : Nat) -> Is-true (is-n-minus-m d) -> Id-Nat n (m + d))
+--                      -> Is-true (contains is-n-minus-m (minus-partial n m))
+-- minus-partial-lemma-2 n m is-n-minus-m is-n-minus-m-lemma = ?
+
+-- minus-partial-lemma-2 : (n m : Nat) -> (p : Nat -> Bool)
+--                      -> Is-true (contains p (applyNTimes m (compose-partial pred-partial (id {Maybe Nat})) (some n)))
+--                      -> Is-true (contains p (minus-partial n m))
+-- minus-partial-lemma-2 n m p contains-p-mth-pred-of-n = ?
+
+-- index-lemma-1 : {A : Set} (n : Nat) (xs : List A) -> Is-true (isEmpty (index n xs)) <-> (suc n Lte (length xs))
+-- index-lemma-1 n xs = ?
+
+-- index-lemma-2 : {A : Set} (n : Nat) (x : A) (xs : List A) (p : A -> Bool)
+--              -> Is-true (contains p (index n xs)) <-> Is-true (contains p (index (suc n) (cons x xs)))
+-- index-lemma-2 n x xs p = ?
+
+-- all-lemma : {A : Set} (p : A -> Bool) (xs : List A)
+--          -> Is-true (all p xs) <-> ((n : Nat) -> (suc n Lte (length xs)) -> Is-true (contains p (index n xs)))
+-- all-lemma p xs = ?
+
+-- map-lemma : {A B : Set} (f : A -> B) (p : B -> Bool) (xs : List A)
+--          -> Is-true (all (compose p f) xs) <-> Is-true (all p (map f xs))
+-- map-lemma f p xs = ?
+
+-- flatten-lemma : {A : Set} (p : A -> Bool) (xss : List (List A))
+--              -> Is-true (all (all p) xss) <-> Is-true (all p (flatten xss))
+-- flatten-lemma p xs = ?
+
+-- Ex6.10: Prove the correctness of the equality operations from chapter 4 exercises
+
+Reflexivity : {A : Set} -> Rel A -> Set
+Reflexivity {A} rel = (x : A) -> Is-true (rel x x)
+
+Substitution : {A : Set} -> Rel A -> Set
+Substitution {A} rel = (P : A -> Set) (x y : A) -> Is-true (rel x y) -> P x -> P y
+
+-- refl-eq-Maybe : {A : Set} (rel-A : Rel A) -> Reflexivity rel-A -> Reflexivity (eq-Maybe rel-A)
+-- refl-eq-Maybe rel-A refl-A x = ?
+
+-- subst-eq-Maybe : {A : Set} (rel-A : Rel A) -> Substitution rel-A -> Substitution (eq-Maybe rel-A)
+-- subst-eq-Maybe rel-A subst-A P x y x-is-y p-x = ?
+
+-- refl-eq-Either : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Reflexivity rel-A -> Reflexivity rel-B
+--               -> Reflexivity (eq-Either rel-A rel-B)
+-- refl-eq-Either rel-A rel-B refl-A refl-B x = ?
+
+-- subst-eq-Either : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Substitution rel-A -> Substitution rel-B
+--                -> Substitution (eq-Either rel-A rel-B)
+-- subst-eq-Either rel-A rel-B subst-A subst-B P x y x-is-y p-x = ?
+
+-- refl-eq-Pair : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Reflexivity rel-A -> Reflexivity rel-B
+--             -> Reflexivity (eq-Pair rel-A rel-B)
+-- refl-eq-Pair rel-A rel-B refl-A refl-B x = ?
+
+-- subst-eq-Pair : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Substitution rel-A -> Substitution rel-B
+--              -> Substitution (eq-Pair rel-A rel-B)
+-- subst-eq-Pair rel-A rel-B subst-A subst-B P x y x-is-y p-x = ?
+
+-- refl-eq-List : {A : Set} (rel-A : Rel A) -> Reflexivity rel-A -> Reflexivity (eq-List rel-A)
+-- refl-eq-List rel-A refl-A x = ?
+
+-- subst-eq-List : {A : Set} (rel-A : Rel A) -> Substitution rel-A -> Substitution (eq-List rel-A)
+-- subst-eq-List rel-A subst-A P x y x-is-y p-x = ?
 
 {-
 
@@ -2985,7 +3125,7 @@ Using the identity function for annotations is a cute trick, but we might prefer
 
 -}
 
--- Declare "a as A" to be syntactic sugar for "id {A} a" and left-associative, so `a as X as Y` == `(a as X) as Y`
+-- Declare "a as A" to be syntactic sugar for "id {A} a" and to be left-associative, so `a as X as Y` == `(a as X) as Y`
 
 infixl 10 id
 syntax id {A} a = a as A
@@ -3013,35 +3153,4 @@ Feel free to insert such type annotations anywhere, including outside of exercis
 
 Place this syntax declaration at the earliest point in this file (after the definition of id) where you wish to use it.
 
-Challenge Exercises:
-
 -}
-
--- todo: 
-
-inhabitance-predicates-imply-lem : (p : Set -> Bool) -> ((A : Set) -> Is-true (p A) <-> A) -> LEM
-inhabitance-predicates-imply-lem p p-is-ip {A} = ?
-
-Tuple : List Set -> Set
-Tuple types = ?
-
-LeibnitzEquality : {A : Set} -> A -> A -> Set
-LeibnitzEquality {A} x y = (P : A -> Set) -> P x -> P y
-
--- LeibnitzEquality<->Id-Bool : (x y : Bool) -> LeibnitzEquality x y <-> Id-Bool x y
--- LeibnitzEquality<->Id-Bool x y = ?
-
--- LeibnitzEquality<->Id-Nat : (x y : Nat) -> LeibnitzEquality x y <-> Id-Nat x y
--- LeibnitzEquality<->Id-Nat x y = ?
-
--- Leibnitz-reflexivity
--- Leibnitz-symmetry
--- Leibnitz-transitivity
--- Leibnitz-congruence
-
--- Prove that _=[Fraction]=_ is an equivalence relation
--- Prove that it is the right equivalence relation
--- Prove that it cannot have a general substitution principle
-
--- prove correctness about various challenge exercises from previous chapters
-
