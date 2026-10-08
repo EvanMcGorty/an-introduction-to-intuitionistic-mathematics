@@ -817,7 +817,7 @@ Challenge Exercises:
 
 -- Similarly, we can think of a `Nat -> Nat -> Nat` as an infinite sequence of infinite sequences of natural numbers
 -- Define a function which flattens such an infinite two-dimensional array into a single infinite sequence
--- Any number which occurs in the provided infinite array *must* occur eventually in the resulting sequence
+-- A number should occur exactly as many times in the resulting sequence as it does in the given squence of sequences
 -- flatten-sequence : (Nat -> Nat -> Nat) -> Nat -> Nat
 -- flatten-sequence f n = ?
 
@@ -827,7 +827,7 @@ Challenge Exercises:
 
 -- Ce2.2: Division and modulus
 
--- Define division and modulus operations for the natural numbers
+-- Define division (rounded down) and modulus operations for the natural numbers
 -- To avoid having to define division/modulus by zero, we implicitly add one to the input for the denominator
 
 -- _/[1+_] : Nat -> Nat -> Nat
@@ -1545,7 +1545,7 @@ getRight-partial (right x) = some x
 
 {-
 
-We can formalize this notion of a partial function with the following parameterized type alias:
+We can formalize this notion of a partial function with the following type alias:
 
 -}
 
@@ -1571,7 +1571,7 @@ compose-partial {_} {B} {C} f g x = h (g x)
 
 {-
 
-Here we define a local helper function in a "where" clause in order to pattern match on the intermediate result `g x`.
+Here we define a local helper function in a `where` clause in order to pattern match on the intermediate result `g x`.
 
 This helper function has access to exactly the variables which are in scope at the body of `compose-partial`.
 
@@ -1684,7 +1684,7 @@ Exercises:
 -- either x y = ?
 
 -- uneither : {A B C : Set} -> (Either A B -> C) -> Pair (A -> C) (B -> C)
--- uneither f = ? -- Hint: it may help to use a "where" clause
+-- uneither f = ? -- Hint: it may help to use a `where` clause
 
 -- Ex4.4: Complete the given definitions which should demonstrate the algebraic law "a * (b + c) = a * b + a * c"
 
@@ -1747,7 +1747,7 @@ Rel A = A -> A -> Bool
 -- Define operations to lift equality comparisons over types A and B into equality comparisons for generic types
 
 -- eq-Pair : {A B : Set} -> Rel A -> Rel B -> Rel (Pair A B)
--- eq-Pair eq-A eq-B (pair a1 b1) (pair a2 b2) = ?
+-- eq-Pair eq-A eq-B x y = ?
 
 -- eq-Either : {A B : Set} -> Rel A -> Rel B -> Rel (Either A B)
 -- eq-Either eq-A eq-B x y = ?
@@ -1867,17 +1867,42 @@ Challenges Exercises:
 
 -}
 
--- Ce4.1: subsequences
+-- Ce4.1: Advanced list operations
 
 -- Compute a list of all subsequences of the provided list
 -- subsequences : {A : Set} -> List A -> List (List A)
 -- subsequences xs = ?
 
--- Ce4.2: sorting
-
 -- Sort a list by the given less-than relation
 -- sortBy : {A : Set} -> (A -> A -> Bool) -> List A -> List A
 -- sortBy _isLessThan_ xs = ?
+
+-- Ce4.2: Boolean expressions
+
+-- We can model boolean expressions with an algebraic datatype:
+data BoolExpr : Set where
+  false-BoolExpr : BoolExpr
+  true-BoolExpr : BoolExpr
+  not-BoolExpr : BoolExpr -> BoolExpr
+  or-BoolExpr : BoolExpr -> BoolExpr -> BoolExpr
+  and-BoolExpr : BoolExpr -> BoolExpr -> BoolExpr
+  implies-BoolExpr : BoolExpr -> BoolExpr -> BoolExpr
+  -- For simplicity, variable names are represented as natural numbers instead of strings
+  var-BoolExpr : Nat -> BoolExpr
+
+-- Given a function to lookup the values of variables, it is easy to evaluate such an expression:
+BoolExpr-as-Bool : (Nat -> Bool) -> BoolExpr -> Bool
+BoolExpr-as-Bool lookup false-BoolExpr = false
+BoolExpr-as-Bool lookup true-BoolExpr = true
+BoolExpr-as-Bool lookup (not-BoolExpr x) = not (BoolExpr-as-Bool lookup x)
+BoolExpr-as-Bool lookup (or-BoolExpr x y) = or (BoolExpr-as-Bool lookup x) (BoolExpr-as-Bool lookup y)
+BoolExpr-as-Bool lookup (and-BoolExpr x y) = and (BoolExpr-as-Bool lookup x) (BoolExpr-as-Bool lookup y)
+BoolExpr-as-Bool lookup (implies-BoolExpr x y) = implies (BoolExpr-as-Bool lookup x) (BoolExpr-as-Bool lookup y)
+BoolExpr-as-Bool lookup (var-BoolExpr var-index) = lookup var-index
+
+-- Determine whether a given expression universally evaluates to true for all possible variable assignments
+-- is-always-true : BoolExpr -> Bool
+-- is-always-true x = ?
 
 {-
 
@@ -1922,11 +1947,11 @@ Nat-is-nonempty'' = suc (suc zero)
 
 The above definitions can all be understood as proofs that Nat is "inhabited", even if this is very obvious anyway.
 
-In intuitionistic mathematics, these "inhabitants" are considered distinct proofs or reasons that Nat is a nonempty Set.
+In intuitionistic mathematics, these "inhabitants" are considered distinct proofs or reasons that `Nat` is nonempty.
 
 An intuitionist might interpret `Nat` itself as this proposition, and say it has a countably infinite number of proofs.
 
-`One` was defined as a Set with exactly one element, and can be interpreted as a trivially true proposition:
+Similarly, `One` was defined as a Set with exactly one element, and can be interpreted as a trivially true proposition:
 
 -}
 
@@ -1969,7 +1994,9 @@ The `()` is called a refutation pattern, and states that we do not need to give 
 
 There is always exactly one function from the empty set to any other set, namely one mapping all zero inputs to outputs.
 
-Evidence of Zero simply cannot exist, since it would let us summon evidence of any other proposition, which is absurd.
+In this vein, `absurd` can be defined by simply pattern matching on all zero possible constructor cases.
+
+Evidence of `Zero` simply cannot exist, since it would let us summon evidence of any other proposition, which is absurd.
 
 At this point, one might notice that function sets correspond exactly to implications when interpreted as propositions:
 
@@ -1981,8 +2008,8 @@ true-implies-true 1/One = 1/One
 false-implies-true : Zero -> One
 false-implies-true ()
 
-true-implying-false-is-absurd : {X : Set} -> (One -> Zero) -> X
-true-implying-false-is-absurd one-to-zero = absurd (one-to-zero 1/One)
+true-does-not-imply-false : {X : Set} -> (One -> Zero) -> X
+true-does-not-imply-false one-to-zero = absurd (one-to-zero 1/One)
 
 false-implies-false : Zero -> Zero
 false-implies-false ()
@@ -2001,7 +2028,7 @@ With the same trick, the products and sums we defined over types can be interpre
 
 -}
 
--- `n times m is nonzero` if and only if `n is nonzero *and* m is nonzero`
+-- "n times m is nonzero" if and only if "n is nonzero *and* m is nonzero"
 -- Therefore `Pair N M` is inhabited if and only if `N` is inhabited *and* `M` is inhabited
 
 true-and-true : Pair One One
@@ -2016,7 +2043,7 @@ true-and-false-is-absurd (pair x ())
 false-and-false-is-absurd : {X : Set} -> Pair Zero Zero -> X
 false-and-false-is-absurd (pair () ())
 
--- `n plus m is nonzero` if and only if `n is nonzero *or* m is nonzero`
+-- "n plus m is nonzero" if and only if "n is nonzero *or* m is nonzero"
 -- Therefore `Either N M` is inhabited if and only if `N` is inhabited *or* `M` is inhabited
 
 true-or-true : Either One One
@@ -2331,16 +2358,16 @@ data Zero' : Set where
 
 -- Ex5.10: Prove the following lemmas about universal quantification
 
--- shift-and-into-forall : {P Q : Set -> Set}
---                      -> Pair ({X : Set} -> P X) ({X : Set} -> Q X) -> {X : Set} -> Pair (P X) (Q X)
+-- shift-and-into-forall : {P Q : Set -> Set} ->
+--                         Pair ({X : Set} -> P X) ({X : Set} -> Q X) -> {X : Set} -> Pair (P X) (Q X)
 -- shift-and-into-forall forall-x-p-x-and-forall-x-q-x = ?
 
--- shift-and-out-of-forall : {P Q : Set -> Set}
---                        -> ({X : Set} -> Pair (P X) (Q X)) -> Pair ({X : Set} -> P X) ({X : Set} -> Q X)
+-- shift-and-out-of-forall : {P Q : Set -> Set} ->
+--                           ({X : Set} -> Pair (P X) (Q X)) -> Pair ({X : Set} -> P X) ({X : Set} -> Q X)
 -- shift-and-out-of-forall forall-x-p-x-and-q-x = ?
 
--- shift-or-into-forall : {P Q : Set -> Set}
---                     -> Either ({X : Set} -> P X) ({X : Set} -> Q X) -> {X : Set} -> Either (P X) (Q X)
+-- shift-or-into-forall : {P Q : Set -> Set} ->
+--                        Either ({X : Set} -> P X) ({X : Set} -> Q X) -> {X : Set} -> Either (P X) (Q X)
 -- shift-or-into-forall forall-x-p-x-or-forall-x-q-x = ?
 
 -- shift-double-negation-into-forall : {P : Set -> Set} -> Not (Not ({X : Set} -> P X)) -> {X : Set} -> Not (Not (P X))
@@ -2370,9 +2397,9 @@ Challenge Exercises:
 
 -- Ce5.2: Anti-classical universal quantification
 
--- cant-shift-or-out-of-forall : {P Q : Set -> Set}
---                            -> (({X : Set} -> Either (P X) (Q X)) -> Either ({X : Set} -> P X) ({X : Set} -> Q X))
---                            -> Not LEM
+-- cant-shift-or-out-of-forall : {P Q : Set -> Set} ->
+--                               (({X : Set} -> Either (P X) (Q X)) -> Either ({X : Set} -> P X) ({X : Set} -> Q X)) ->
+--                               Not LEM
 -- cant-shift-or-out-of-forall = ?
 
 -- Ce5.3: The principle of double negation shift
@@ -2755,28 +2782,11 @@ To force Agda to explicitly avoid any normalization whatsoever, a command can si
 
 -}
 
--- Ex6.1: Use dependent pattern matching to prove the following lemmas about your chapter 1 solutions
+-- Ex6.1: Formalize our interpretation of various types as particular propositions
 
 Is-true : Bool -> Set
 Is-true false = Zero
 Is-true true = One
-
--- or<->|| : (x y : Bool) -> Is-true (or x y) <-> Is-true (x || y)
--- or<->|| x y = ?
-
--- not-and<->nand : (x y : Bool) -> Is-true (not (and x y)) <-> Is-true (nand x y)
--- not-and<->nand x y = ?
-
--- and-and<->and3 : (x y z : Bool) -> Is-true (and x (and y z)) <-> Is-true (and3 x y z)
--- and-and<->and3 x y z = ?
-
--- Formulate and prove that implies is the same as _=>_
-
--- Formulate and prove that xor is the same as _^^_
-
--- Formulate the law of the excluded middle in terms of boolean operations and show that it always Is-true
-
--- Ex6.2: Formalize our interpretation of various types as particular propositions
 
 -- One~true : One <-> Is-true true
 -- One~true = ?
@@ -2793,11 +2803,28 @@ Is-true true = One
 -- Either~or : (x y : Bool) -> Either (Is-true x) (Is-true y) <-> Is-true (or x y)
 -- Either~or x y = ?
 
--- ->~implication : (x y : Bool) -> (Is-true x -> Is-true y) <-> Is-true (implies x y)
--- ->~implication x y = ?
+-- ->~implies : (x y : Bool) -> (Is-true x -> Is-true y) <-> Is-true (implies x y)
+-- ->~implies x y = ?
 
--- <->~biimplication : (x y : Bool) -> (Is-true x <-> Is-true y) <-> Is-true (x <=> y)
--- <->~biimplication x y = ?
+-- Ex6.2: Prove the following lemmas about your chapter 1 solutions
+
+-- or<->|| : (x y : Bool) -> Is-true (or x y) <-> Is-true (x || y)
+-- or<->|| x y = ?
+
+-- not-and<->nand : (x y : Bool) -> Is-true (not (and x y)) <-> Is-true (nand x y)
+-- not-and<->nand x y = ?
+
+-- and-and<->and3 : (x y z : Bool) -> Is-true (and x (and y z)) <-> Is-true (and3 x y z)
+-- and-and<->and3 x y z = ?
+
+-- Formulate and prove that implies is the same as _=>_
+
+-- Formulate and prove that xor is the same as _^^_
+
+-- <->~<=> : (x y : Bool) -> (Is-true x <-> Is-true y) <-> Is-true (x <=> y)
+-- <->~<=> x y = ?
+
+-- Formulate the law of the excluded middle in terms of boolean operations and show that it always Is-true
 
 -- Ex6.3: Formalize a notion of propositional equality for the booleans
 
@@ -2810,7 +2837,7 @@ Is-true true = One
 -- Bool-substitution : (P : Bool -> Set) (x y : Bool) -> Id-Bool x y -> P x -> P y
 -- Bool-substitution P x y x-is-y p-x = ?
 
--- Prove the following lemmas by substitution where `P` is `Is-true`
+-- Prove the following lemmas by substitution into the predicate `Is-true`
 
 -- always-true-lemma-1  : (f : Bool -> Bool) -> Id-Bool (f false) (f true) -> Is-true (f false) -> Is-true (f true)
 -- always-true-lemma-1 f f-false-is-f-true f-false-Is-true = Bool-substitution Is-true ? ? ? ?
@@ -2832,12 +2859,12 @@ Is-true true = One
 -- Prove the following lemmas with multiple consecutive substitutions into appropriately chosen predicates
 -- (tip: write out the individual steps as separate helper definitions and then compose them)
 
--- always-true-lemma-5 : (f : Bool -> Bool) -> Id-Bool true (f false) -> Id-Bool true (f true)
---                    -> Is-true (f false && f true)
+-- always-true-lemma-5 : (f : Bool -> Bool) -> Id-Bool true (f false) -> Id-Bool true (f true) ->
+--                       Is-true (f false && f true)
 -- always-true-lemma-5 f true-is-f-false true-is-f-true = ?
 
--- Bool-identity-lemma : (f : Bool -> Bool) -> Id-Bool false (f false) -> Id-Bool true (f true)
---                    -> Is-true (is-the-identity-function f)
+-- Bool-identity-lemma : (f : Bool -> Bool) -> Id-Bool false (f false) -> Id-Bool true (f true) ->
+--                       Is-true (is-the-identity-function f)
 -- Bool-identity-lemma f p = ?
 
 -- Ex6.4: Induction over the booleans
@@ -2867,8 +2894,8 @@ Is-true true = One
 
 -- Use induction to prove the following theorem about one of your chapter 1 solutions
 
--- BoolToBool-equality-lemma : (f g : Bool -> Bool) -> Id-Bool (f false) (g false) -> Id-Bool (f true) (g true)
---                          -> Is-true (f =[BoolToBool]= g)
+-- BoolToBool-equality-lemma : (f g : Bool -> Bool) -> Id-Bool (f false) (g false) -> Id-Bool (f true) (g true) ->
+--                             Is-true (f =[BoolToBool]= g)
 -- BoolToBool-equality-lemma = ?
 
 -- Ex6.5: Prove the following lemmas about natural numbers and equalities over natural numbers
@@ -2986,8 +3013,8 @@ zero Lte y = One -- 0 is less than or equal to y
 -- halfOf-is-a-lie f = ?
 
 -- It is impossible to define exponentiation such that both `n^0 = 1` and `0^n = 0` always hold
--- exponentiation-anti-lemma : (_^'_ : Nat -> Nat -> Nat)
---                          -> Not (Pair ((n : Nat) -> Id-Nat (n ^' 0) 1) ((n : Nat) -> Id-Nat (0 ^' n) 0))
+-- exponentiation-anti-lemma : (_^'_ : Nat -> Nat -> Nat) ->
+--                             Not (Pair ((n : Nat) -> Id-Nat (n ^' 0) 1) ((n : Nat) -> Id-Nat (0 ^' n) 0))
 -- exponentiation-anti-lemma _^'_ x = ?
 
 -- Ex6.9: Complete the given definitions involving algebraic datatypes
@@ -2997,8 +3024,8 @@ zero Lte y = One -- 0 is less than or equal to y
 -- Pair-induction : {A B : Set} (P : Pair A B -> Set) -> ((a : A) (b : B) -> P (pair a b)) -> (x : Pair A B) -> P x
 -- Pair-induction P f x = ?
 
--- Either-induction : {A B : Set} (P : Either A B -> Set)
---                 -> ((a : A) -> P (left a)) -> ((b : B) -> P (right b)) -> (x : Either A B) -> P x
+-- Either-induction : {A B : Set} (P : Either A B -> Set) ->
+--                    ((a : A) -> P (left a)) -> ((b : B) -> P (right b)) -> (x : Either A B) -> P x
 -- Either-induction P f g x = ?
 
 -- Maybe-induction : {A : Set} (P : Maybe A -> Set) -> ((a : A) -> P (some a)) -> P none -> (x : Maybe A) -> P x
@@ -3025,40 +3052,40 @@ zero Lte y = One -- 0 is less than or equal to y
 -- orElse-lemma-1 : {A : Set} (x y : Maybe A) -> Is-true (isEmpty (x orElse y)) -> Is-true (isEmpty y)
 -- orElse-lemma-1 x y x-orElse-y-isEmpty-y = ?
 
--- orElse-lemma-2 : {A : Set} (x y : Maybe A) (p : A -> Bool)
---               -> Is-true (contains p x) -> Is-true (contains p (x orElse y))
+-- orElse-lemma-2 : {A : Set} (x y : Maybe A) (p : A -> Bool) ->
+--                  Is-true (contains p x) -> Is-true (contains p (x orElse y))
 -- orElse-lemma-2 x y p contains-p-x = ?
 
 -- minus-partial-lemma-1 : (n m : Nat) -> suc n Lte m -> Is-true (isEmpty (minus-partial n m))
 -- minus-partial-lemma-1 n m n<m = ?
 
--- minus-partial-lemma-2 : (n m : Nat) (is-n-minus-m : Nat -> Bool)
---                      -> ((d : Nat) -> Is-true (is-n-minus-m d) -> Id-Nat n (m + d))
---                      -> Is-true (contains is-n-minus-m (minus-partial n m))
+-- minus-partial-lemma-2 : (n m : Nat) (is-n-minus-m : Nat -> Bool) ->
+--                         ((d : Nat) -> Is-true (is-n-minus-m d) -> Id-Nat n (m + d)) ->
+--                         Is-true (contains is-n-minus-m (minus-partial n m))
 -- minus-partial-lemma-2 n m is-n-minus-m is-n-minus-m-lemma = ?
 
--- minus-partial-lemma-2 : (n m : Nat) -> (p : Nat -> Bool)
---                      -> Is-true (contains p (applyNTimes m (compose-partial pred-partial (id {Maybe Nat})) (some n)))
---                      -> Is-true (contains p (minus-partial n m))
+-- minus-partial-lemma-2 : (n m : Nat) -> (p : Nat -> Bool) ->
+--                         Is-true (contains p (applyNTimes m (compose-partial pred-partial (id {Maybe Nat})) (some n))) ->
+--                         Is-true (contains p (minus-partial n m))
 -- minus-partial-lemma-2 n m p contains-p-mth-pred-of-n = ?
 
 -- index-lemma-1 : {A : Set} (n : Nat) (xs : List A) -> Is-true (isEmpty (index n xs)) <-> (suc n Lte (length xs))
 -- index-lemma-1 n xs = ?
 
--- index-lemma-2 : {A : Set} (n : Nat) (x : A) (xs : List A) (p : A -> Bool)
---              -> Is-true (contains p (index n xs)) <-> Is-true (contains p (index (suc n) (cons x xs)))
+-- index-lemma-2 : {A : Set} (n : Nat) (x : A) (xs : List A) (p : A -> Bool) ->
+--                 Is-true (contains p (index n xs)) <-> Is-true (contains p (index (suc n) (cons x xs)))
 -- index-lemma-2 n x xs p = ?
 
--- all-lemma : {A : Set} (p : A -> Bool) (xs : List A)
---          -> Is-true (all p xs) <-> ((n : Nat) -> (suc n Lte (length xs)) -> Is-true (contains p (index n xs)))
+-- all-lemma : {A : Set} (p : A -> Bool) (xs : List A) ->
+--             Is-true (all p xs) <-> ((n : Nat) -> (suc n Lte (length xs)) -> Is-true (contains p (index n xs)))
 -- all-lemma p xs = ?
 
--- map-lemma : {A B : Set} (f : A -> B) (p : B -> Bool) (xs : List A)
---          -> Is-true (all (compose p f) xs) <-> Is-true (all p (map f xs))
+-- map-lemma : {A B : Set} (f : A -> B) (p : B -> Bool) (xs : List A) ->
+--             Is-true (all (compose p f) xs) <-> Is-true (all p (map f xs))
 -- map-lemma f p xs = ?
 
--- flatten-lemma : {A : Set} (p : A -> Bool) (xss : List (List A))
---              -> Is-true (all (all p) xss) <-> Is-true (all p (flatten xss))
+-- flatten-lemma : {A : Set} (p : A -> Bool) (xss : List (List A)) ->
+--                 Is-true (all (all p) xss) <-> Is-true (all p (flatten xss))
 -- flatten-lemma p xs = ?
 
 -- Ex6.10: Prove the correctness of the equality operations from chapter 4 exercises
@@ -3075,20 +3102,20 @@ Substitution {A} rel = (P : A -> Set) (x y : A) -> Is-true (rel x y) -> P x -> P
 -- subst-eq-Maybe : {A : Set} (rel-A : Rel A) -> Substitution rel-A -> Substitution (eq-Maybe rel-A)
 -- subst-eq-Maybe rel-A subst-A P x y x-is-y p-x = ?
 
--- refl-eq-Either : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Reflexivity rel-A -> Reflexivity rel-B
---               -> Reflexivity (eq-Either rel-A rel-B)
+-- refl-eq-Either : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Reflexivity rel-A -> Reflexivity rel-B ->
+--                  Reflexivity (eq-Either rel-A rel-B)
 -- refl-eq-Either rel-A rel-B refl-A refl-B x = ?
 
--- subst-eq-Either : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Substitution rel-A -> Substitution rel-B
---                -> Substitution (eq-Either rel-A rel-B)
+-- subst-eq-Either : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Substitution rel-A -> Substitution rel-B ->
+--                   Substitution (eq-Either rel-A rel-B)
 -- subst-eq-Either rel-A rel-B subst-A subst-B P x y x-is-y p-x = ?
 
--- refl-eq-Pair : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Reflexivity rel-A -> Reflexivity rel-B
---             -> Reflexivity (eq-Pair rel-A rel-B)
+-- refl-eq-Pair : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Reflexivity rel-A -> Reflexivity rel-B ->
+--                Reflexivity (eq-Pair rel-A rel-B)
 -- refl-eq-Pair rel-A rel-B refl-A refl-B x = ?
 
--- subst-eq-Pair : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Substitution rel-A -> Substitution rel-B
---              -> Substitution (eq-Pair rel-A rel-B)
+-- subst-eq-Pair : {A B : Set} (rel-A : Rel A) (rel-B : Rel B) -> Substitution rel-A -> Substitution rel-B ->
+--                 Substitution (eq-Pair rel-A rel-B)
 -- subst-eq-Pair rel-A rel-B subst-A subst-B P x y x-is-y p-x = ?
 
 -- refl-eq-List : {A : Set} (rel-A : Rel A) -> Reflexivity rel-A -> Reflexivity (eq-List rel-A)
@@ -3153,4 +3180,38 @@ Feel free to insert such type annotations anywhere, including outside of exercis
 
 Place this syntax declaration at the earliest point in this file (after the definition of id) where you wish to use it.
 
+Challenge Exercises:
+
 -}
+
+-- Ce6.1: Reconciling classical truth and intuitionistic evidence
+
+-- Recall the definition of `BoolExpr` from the challenge exercises of chapter 4
+
+-- Just as `BoolExpr-as-Bool` maps `BoolExpr`s to `Bools`, map `BoolExpr`s to Sets
+-- BoolExpr-as-Set : (Nat -> Set) -> BoolExpr -> Set
+-- BoolExpr-as-Set lookup x = ?
+
+-- Show that a `BoolExpr` is always true as a `Bool` if it is always inhabited as a Set
+-- evidence-to-truth : (x : BoolExpr) ->
+--                     ((lookup-Set : Nat -> Set) -> BoolExpr-as-Set lookup-Set x) ->
+--                     (lookup : Nat -> Bool) -> Is-true (BoolExpr-as-Bool lookup x)
+-- evidence-to-truth x always-provable lookup = ?
+
+-- Show that if a `BoolExpr` is always true as a Bool then LEM can be used to construct an inhabitant of it as a Set
+-- truth-to-evidence-via-LEM : LEM -> (x : BoolExpr) ->
+--                             ((lookup : Nat -> Bool) -> Is-true (BoolExpr-as-Bool lookup x)) ->
+--                             (lookup-Set : Nat -> Set) -> BoolExpr-as-Set lookup-Set x
+-- truth-to-evidence-via-LEM lem x always-true lookup-Set = ?
+
+-- Prove the inverse of the previous lemma
+-- LEM-via-truth-to-evidence : ((x : BoolExpr) ->
+--                               ((lookup : Nat -> Bool) -> Is-true (BoolExpr-as-Bool lookup x)) ->
+--                               (lookup-Set : Nat -> Set) -> BoolExpr-as-Set lookup-Set x
+--                             ) -> LEM
+-- LEM-via-truth-to-evidence truth-to-evidence {A} = ?
+
+-- Prove the correctness of your challenge-exercise solution for `is-always-true`
+-- is-always-true-lemma : (x : BoolExpr) ->
+--                        Is-true (is-always-true x) <-> ((lookup : Nat -> Bool) -> Is-true (BoolExpr-as-Bool lookup x))
+-- is-always-true-lemma x = ?

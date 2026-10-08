@@ -13,35 +13,35 @@ Learning to formally state and prove propositions about programs and other mathe
 ## Index
 ### Preface
 - Setting up Agda in Emacs
-- Loading the file with "C-c C-l"
-- Adjusting font size with "C-c C-+", "C-c C--"
-- Canceling commands with "C-g" or "<ESC><ESC><ESC>"
+- Loading the file with `C-c C-l`
+- Adjusting font size with `C-c C-+`, `C-c C--`
+- Canceling commands with `C-g` or `\<ESC\>\<ESC\>\<ESC\>`
 ### Part 1. Pure Functional Programming
 - Purity and totality
 #### Chapter 1. Booleans
 - Curried functions
-- Commenting code in and out with "C-x C-;"
-- Filling in holes with "C-c C-Space"
-- Testing code with "C-c C-n"
-- Managing multiple windows with "C-x <n>"
+- Commenting code in and out with `C-x C-;`
+- Filling in holes with `C-c C-Space`
+- Testing code with `C-c C-n`
+- Managing multiple windows with `C-x <n>`
 #### Chapter 2. Natural Numbers
 - Structural recursion
 - BUILTIN-pragmas
-- Assisted pattern matching with "C-c C-c"
-- Jumping between holes with "C-c C-f" and "C-c C-b"
+- Assisted pattern matching with `C-c C-c`
+- Jumping between holes with `C-c C-f` and `C-c C-b`
 - Declaring custom operator precedence and associativity
 #### Chapter 3. Parametric Polymorphism
 - (explicit) and {implicit} named parameters in types
 - Parametric/Church encodings
-- Inspecting types with "C-c C-,", "C-c C-.", and "C-u C-u ..."
-- Jumping to a definition with "M-." and back with "M-,"
-- Refining a solution with "C-c C-r"
+- Inspecting types with `C-c C-,`, `C-c C-.`, and `C-u C-u ...`
+- Jumping to a definition with `M-.` and back with `M-,`
+- Refining a solution with `C-c C-r`
 #### Chapter 4. Algebraic Datatypes
 - Sum and product types
 - Generic datatypes
-- Defining helper functions with "where" clauses
+- Defining helper functions with `where` clauses
 - Exponential types
-- Discovering key-combos with "C-h m", "C-h t"
+- Discovering key-combos with `C-h m`, `C-h t`
 ### Part 2. Constructive Theorem Proving
 - Intuitionistic vs classical logic
 #### Chapter 5. Intuitionistic Propositions
@@ -49,10 +49,10 @@ Learning to formally state and prove propositions about programs and other mathe
 - Propositional "and", "or", "implies", "forall", and "not"
 - The principle of explosion
 - The law of the excluded middle and double negation elimination
-- Searching forwards and backwards with "C-s", "C-r"
+- Searching forwards and backwards with `C-s`, `C-r`
 #### Chapter 6. Dependent Types
 - Computing types from values
 - Definitional equalities and dependent pattern matching
 - Induction and substitution
-- Displaying unnormalized types with "C-u ..."
-- Type annotations and solving for types with "C-c C-s"
+- Displaying unnormalized types with `C-u ...`
+- Type annotations and solving for types with `C-c C-s`
