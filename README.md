@@ -53,6 +53,10 @@ Learning to formally state and prove propositions about programs and other mathe
 #### Chapter 6. Dependent Types
 - Computing types from values
 - Definitional equalities and dependent pattern matching
-- Induction and substitution
+- Induction and substitution with predicates
 - Displaying unnormalized types with `C-u ...`
 - Type annotations and solving for types with `C-c C-s`
+#### Chapter 7. Generalized Algebraic Datatypes
+- Equality constraints
+- Propositional "exists"
+- `Sigma` and `Pi`

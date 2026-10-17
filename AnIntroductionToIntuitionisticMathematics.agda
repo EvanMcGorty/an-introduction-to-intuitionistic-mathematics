@@ -292,8 +292,8 @@ If you get stuck on or lose interest in an exercise, just skip it since you can 
 
 -- Ex1.9: Compare two `Bool -> Bool`s for equality
 
--- _=[BoolToBool]=_ : BoolToBool -> BoolToBool -> Bool
--- f =[BoolToBool]= g = ?
+-- eq-BoolToBool : BoolToBool -> BoolToBool -> Bool
+-- eq-BoolToBool f g = ?
 
 -- Ex1.10: Extending the booleans with uncertainty
 
@@ -662,8 +662,8 @@ Be sure to take full advantage of Agda's interactive editing when completing exe
 -- Ex2.3: Comparison operations
 
 -- Equality for natural numbers
--- _=[Nat]=_ : Nat -> Nat -> Bool
--- n =[Nat]= m = ?
+-- eq-Nat : Nat -> Nat -> Bool
+-- eq-Nat n m = ?
 
 -- Less-than
 -- _<_ : Nat -> Nat -> Bool
@@ -703,7 +703,7 @@ Be sure to take full advantage of Agda's interactive editing when completing exe
 -- Note that BUILTIN-pragmas verify your definitions on a best-effort basis and may fail even for a correct definition
 -- {-# BUILTIN NATTIMES _*_ #-}
 -- {-# BUILTIN NATMINUS _-_ #-}
--- {-# BUILTIN NATEQUALS _=[Nat]=_ #-}
+-- {-# BUILTIN NATEQUALS eq-Nat #-}
 -- {-# BUILTIN NATLESS _<_ #-}
 
 -- Ex2.9: Integers
@@ -719,8 +719,8 @@ data Int : Set where
 
 -- Define the following operations over integers
 
--- _=[Int]=_ : Int -> Int -> Bool
--- n =[Int]= m = ?
+-- eq-Int : Int -> Int -> Bool
+-- eq-Int n m = ?
 
 -- _z+_ : Int -> Int -> Int
 -- x z+ y = ?
@@ -750,8 +750,8 @@ data Fraction : Set where
 -- Define the following operations over the rational numbers, treating equivalent fractions as equal
 -- Note that all of these definitions can be completed without reducing any fractions to normal form
 
--- _=[Rational]=_ : Fraction -> Fraction -> Bool
--- n =[Rational]= m = ?
+-- eq-Rational : Fraction -> Fraction -> Bool
+-- eq-Rational n m = ?
 
 -- _q+_ : Fraction -> Fraction -> Fraction
 -- x q+ y = ?
@@ -2446,7 +2446,7 @@ A language with "Dependent Types" allows us to fluidly bridge the gap between va
 
 -}
 
--- `Vec` is a list type parameterized by (or "dependent" on) a length, so `Vec n A` is a list of exactly `n` `A`s.
+-- `Vec` is a list type parameterized by (or "dependent" on) a length, so `Vec n A` is a list of exactly `n` `A`s
 Vec : Nat -> Set -> Set
 Vec zero A = One
 Vec (suc n) A = Pair A (Vec n A)
@@ -2895,7 +2895,7 @@ Is-true true = One
 -- Use induction to prove the following theorem about one of your chapter 1 solutions
 
 -- BoolToBool-equality-lemma : (f g : Bool -> Bool) -> Id-Bool (f false) (g false) -> Id-Bool (f true) (g true) ->
---                             Is-true (f =[BoolToBool]= g)
+--                             Is-true (eq-BoolToBool f g)
 -- BoolToBool-equality-lemma = ?
 
 -- Ex6.5: Prove the following lemmas about natural numbers and equalities over natural numbers
@@ -2962,16 +2962,21 @@ Is-true true = One
 -- ^-+-*-distribution : (x y z : Nat) -> Id-Nat (x ^ (y + z)) ((x ^ y) * (x ^ z))
 -- ^-+-*-distribution x y z = ?
 
--- Id-Nat~=[Nat]= : (x y : Nat) -> Id-Nat x y <-> Is-true (x =[Nat]= y)
--- Id-Nat~=[Nat]= x y = ?
+-- Id-Nat~eq-Nat : (x y : Nat) -> Id-Nat x y <-> Is-true (eq-Nat x y)
+-- Id-Nat~eq-Nat x y = ?
 
+-- Less than or equal to relation
 _Lte_ : Nat -> Nat -> Set
 zero Lte y = One -- 0 is less than or equal to y
 (suc x) Lte zero = Zero -- x + 1 is not less than or equal to 0
 (suc x) Lte (suc y) = x Lte y -- x + 1 is less than or equal to y + 1 when x is less than or equal to y
 
--- Lte~not-< : (x y : Nat) -> (x Lte y) <-> Is-true (not (y < x))
--- Lte~not-< x y = ?
+-- Less than relation
+_Lt_ : Nat -> Nat -> Set
+x Lt y = suc x Lte y
+
+-- Lt~not-< : (x y : Nat) -> (x Lt y) <-> Is-true (x < y)
+-- Lt~not-< x y = ?
 
 -- Ex6.7: Complete the following definitions involving `Vec`s
 
@@ -2987,7 +2992,7 @@ zero Lte y = One -- 0 is less than or equal to y
 -- take : {A : Set} (n m : Nat) -> m Lte n -> Vec n A -> Vec m A
 -- take n m n>=m xs = ?
 
--- index-Vec : {A : Set} {n : Nat} (i : Nat) -> (suc i) Lte n -> Vec n A -> A
+-- index-Vec : {A : Set} {n : Nat} (i : Nat) -> i Lt n -> Vec n A -> A
 -- index-Vec = ?
 
 -- List-to-Vec : {A : Set} -> (xs : List A) -> Vec (length xs) A
@@ -3056,7 +3061,7 @@ zero Lte y = One -- 0 is less than or equal to y
 --                  Is-true (contains p x) -> Is-true (contains p (x orElse y))
 -- orElse-lemma-2 x y p contains-p-x = ?
 
--- minus-partial-lemma-1 : (n m : Nat) -> suc n Lte m -> Is-true (isEmpty (minus-partial n m))
+-- minus-partial-lemma-1 : (n m : Nat) -> n Lt m -> Is-true (isEmpty (minus-partial n m))
 -- minus-partial-lemma-1 n m n<m = ?
 
 -- minus-partial-lemma-2 : (n m : Nat) (is-n-minus-m : Nat -> Bool) ->
@@ -3069,7 +3074,7 @@ zero Lte y = One -- 0 is less than or equal to y
 --                         Is-true (contains p (minus-partial n m))
 -- minus-partial-lemma-2 n m p contains-p-mth-pred-of-n = ?
 
--- index-lemma-1 : {A : Set} (n : Nat) (xs : List A) -> Is-true (isEmpty (index n xs)) <-> (suc n Lte (length xs))
+-- index-lemma-1 : {A : Set} (n : Nat) (xs : List A) -> Is-true (isEmpty (index n xs)) <-> (n Lt (length xs))
 -- index-lemma-1 n xs = ?
 
 -- index-lemma-2 : {A : Set} (n : Nat) (x : A) (xs : List A) (p : A -> Bool) ->
@@ -3077,7 +3082,7 @@ zero Lte y = One -- 0 is less than or equal to y
 -- index-lemma-2 n x xs p = ?
 
 -- all-lemma : {A : Set} (p : A -> Bool) (xs : List A) ->
---             Is-true (all p xs) <-> ((n : Nat) -> (suc n Lte (length xs)) -> Is-true (contains p (index n xs)))
+--             Is-true (all p xs) <-> ((n : Nat) -> (n Lt (length xs)) -> Is-true (contains p (index n xs)))
 -- all-lemma p xs = ?
 
 -- map-lemma : {A B : Set} (f : A -> B) (p : B -> Bool) (xs : List A) ->
@@ -3215,3 +3220,399 @@ Challenge Exercises:
 -- is-always-true-lemma : (x : BoolExpr) ->
 --                        Is-true (is-always-true x) <-> ((lookup : Nat -> Bool) -> Is-true (BoolExpr-as-Bool lookup x))
 -- is-always-true-lemma x = ?
+
+{-
+
+Chapter 7. Generalized Algebraic Datatypes
+
+In Agda, one way to define a proposition is in terms of a computation which the termination checker deems total.
+
+The boolean equality of natural numbers is easy to compute, and so `Id-Nat` may be defined by computation.
+
+On the other hand, the boolean equality of *functions* between natural numbers is impossible to compute in general:
+
+-}
+
+-- eq-NatToNat : (Nat -> Nat) -> (Nat -> Nat) -> Bool
+-- eq-NatToNat f g = ?
+
+{-
+
+Doing so would require us to test infinitely many inputs and verify that all corresponding outputs are equal.
+
+Similarly, it is impossible to compute whether any two arbitrary Sets are equal:
+
+-}
+
+-- eq-Set : Set -> Set -> Bool
+-- eq-Set A B = ?
+
+{-
+
+As Sets can encode arbitrarily difficult mathematical theorems, this would amount to solving the halting problem.
+
+Yet, this should not stop us from at least being able to talk about such undecideable equalities.
+
+Generalized Algebraic Datatypes or GADTs fill this gap by allowing us to work with equality constraints:
+
+-}
+
+data Is-Nat-Or-Bool : Set -> Set where
+  Nat-Is-Nat-Or-Bool : Is-Nat-Or-Bool Nat
+  Bool-Is-Nat-Or-Bool : Is-Nat-Or-Bool Bool
+
+{-
+
+The above GADT is a function from Set to Set whose output type is only inhabited if its input is `Nat` or `Bool`.
+
+There is simply no way to construct an `Is-Nat-Or-Bool X` for any `X` which is not either `Nat` or `Bool`:
+
+-}
+
+-- One-Is-Nat-Or-Bool : Is-Nat-Or-Bool One
+-- One-Is-Nat-Or-Bool = ?
+
+{-
+
+Furthermore, given an `Is-Nat-Or-Bool X`, we can pattern match on it to find out whether `X` is `Nat` or `Bool`:
+
+-}
+
+next-Nat-Or-Bool : {X : Set} -> Is-Nat-Or-Bool X -> X -> X
+next-Nat-Or-Bool Nat-Is-Nat-Or-Bool n = suc n
+next-Nat-Or-Bool Bool-Is-Nat-Or-Bool b = not b
+
+{-
+
+In the first case, we learn that our `Is-Nat-Or-Bool X` was in fact more specifically a `Is-Nat-Or-Bool Nat`.
+
+However, this could only possibly mean that `X` was actually just `Nat` the whole time.
+
+This induces an equality constraint, with which the type checker simplifies the remaining type down to `Nat -> Nat`.
+
+This is similar to how we can narrow down the dependent type `Vec n A` by pattern matching on its input `n`.
+
+GADTs invert this: by pattern matching on the dependent type `Is-Nat-Or-Bool X`, we can narrow down its input `X`.
+
+Rather than defining a new GADT for every kind of equality we want to express, we can define a genralized identity type:
+
+-}
+
+data Id-Set : Set -> Set -> Set where
+  refl-Set : (X : Set) -> Id-Set X X
+
+{-
+
+`Id-Set` has two input types, yet can only be proven if these two inputs are in fact one and the same `X`:
+
+-}
+
+Nat-is-Nat : Id-Set Nat Nat
+Nat-is-Nat = refl-Set Nat
+
+Bool-is-Bool : Id-Set Bool Bool
+Bool-is-Bool = refl-Set Bool
+
+{-
+
+As with the ADTs `Pair` and `Either`, we can use the GADT `Id-Set` as a building block for expressing other GADTs:
+
+-}
+
+Is-Nat-Or-Bool' : Set -> Set
+Is-Nat-Or-Bool' X = Either (Id-Set Nat X) (Id-Set Bool X)
+
+Is-Nat-Or-Bool'-to-Is-Nat-Or-Bool : {X : Set} -> Is-Nat-Or-Bool' X -> Is-Nat-Or-Bool X
+Is-Nat-Or-Bool'-to-Is-Nat-Or-Bool (left (refl-Set Nat)) = Nat-Is-Nat-Or-Bool
+Is-Nat-Or-Bool'-to-Is-Nat-Or-Bool (right (refl-Set Bool)) = Bool-Is-Nat-Or-Bool
+
+Is-Nat-Or-Bool-to-Is-Nat-Or-Bool' : {X : Set} -> Is-Nat-Or-Bool X -> Is-Nat-Or-Bool' X
+Is-Nat-Or-Bool-to-Is-Nat-Or-Bool' Nat-Is-Nat-Or-Bool = (left (refl-Set Nat))
+Is-Nat-Or-Bool-to-Is-Nat-Or-Bool' Bool-Is-Nat-Or-Bool = (right (refl-Set Bool))
+
+{-
+
+When we pattern match an `Id-Set X Y against `refl-Set`, the constraint solver attempts to "unify" `X` and `Y`.
+
+It is possible to introduce any number of overlapping equality constraints, so unification works on a best effort basis.
+
+Rather than constantly relying on the constraint solver, we can to use it just once to define a substitution principle:
+
+-}
+
+Set-substitution : {X Y : Set} (P : Set -> Set) -> Id-Set X Y -> P X -> P Y
+Set-substitution P (refl-Set _) p-x = p-x
+
+{-
+
+Now we can explicitly use `Set-substitution` in place of pattern matching against `refl-Set` and relying on unification:
+
+-}
+
+Is-Nat-Or-Bool'-to-Is-Nat-Or-Bool-2 : {X : Set} -> Is-Nat-Or-Bool' X -> Is-Nat-Or-Bool X
+Is-Nat-Or-Bool'-to-Is-Nat-Or-Bool-2 (left X-eq-Nat) = Set-substitution Is-Nat-Or-Bool X-eq-Nat Nat-Is-Nat-Or-Bool
+Is-Nat-Or-Bool'-to-Is-Nat-Or-Bool-2 (right X-eq-Bool) = Set-substitution Is-Nat-Or-Bool X-eq-Bool Bool-Is-Nat-Or-Bool
+
+{-
+
+When `P = Is-Nat-Or-Bool`, substitution with an `Id-Set Nat X` gives us an `Is-Nat-Or-Bool Nat -> Is-Nat-Or-Bool X`.
+
+Instead of expecting Agda to see that these two types are the same, substitution lets us perform an explicit cast.
+
+GADTs are quite an exotic language feature, and are typically intended for working with equalities between types.
+
+In a dependently typed language like Agda, however, they can also express equalities between values:
+
+-}
+
+data Id-NatToNat : (Nat -> Nat) -> (Nat -> Nat) -> Set where
+  refl-NatToNat : (f : Nat -> Nat) -> Id-NatToNat f f
+
+suc-is-suc : Id-NatToNat suc suc
+suc-is-suc = refl-NatToNat suc
+
+{-
+
+In fact, why not just define a fully polymorphic identity type for expressing equalities over any arbitrary domain:
+
+-}
+
+data Id : (A : Set) -> A -> A -> Set where
+  refl : {A : Set} (x : A) -> Id A x x
+
+{-
+
+This identity type subsumes every previously defined identity type in terms of its propositional meaning.
+
+That is, `Id Set`, `Id (Nat -> Nat)`, and `Id Nat` subsume `Id-Set`, `Id-NatToNat`, and `Id-Nat` respectively.
+
+Now that we have a type-generic equality, one syntactic optimization we can make is to define `==` as an alias:
+
+-}
+
+_==_ : {A : Set} -> A -> A -> Set
+x == y = Id _ x y
+
+{-
+
+One notable difference to `Id-Nat` is that `Id Nat` has no definitional equalities, which may be proven instead:
+
+-}
+
+-- Proof via pattern matching, relying on the constraint solver to do work for us
+n-equals-m-implies-n+1-equals-m+1' : {n m : Nat} -> n == m -> suc n == suc m
+n-equals-m-implies-n+1-equals-m+1' (refl x) = (refl (suc x))
+
+-- Substitution principle defined via pattern matching
+subst : {A : Set} {x y : A} (P : A -> Set) -> x == y -> P x -> P y
+subst P (refl _) p-x = p-x
+
+-- Explicit, reliable proof via substitution
+n-equals-m-implies-n+1-equals-m+1'' : {n m : Nat} -> n == m -> suc n == suc m
+n-equals-m-implies-n+1-equals-m+1'' {n} {m} n-is-m = p-n-to-p-m (refl (suc n))
+  where
+    P : Nat -> Set
+    P x = suc n == suc x
+    p-n-to-p-m : suc n == suc n -> suc n == suc m
+    p-n-to-p-m = subst P n-is-m
+
+{-
+
+With `Id-Nat`, this lemma was effectively true by definition, since its type just reduced to `Id-Nat n m -> Id-Nat n m`.
+
+Another kind of type which is typically falls under the umbrella of GADTs is an existential type:
+
+-}
+
+data IsEven : Nat -> Set where
+  mkIsEven : {n : Nat} (e : Nat) -> n == (e + e) -> IsEven n
+
+{-
+
+`IsEven n` is a proposition which says that `n` is even when there exists an `e : Nat` such that `n == e + e`.
+
+Critically, the constructor `mkIsEven` accepts a named input `e` which is not exposed as an input to the type `IsEven`.
+
+Hiding `e` like this is what makes `IsEven` an existential type, rather than a synonym for `n == (e + e)`.
+
+`IsEven n` should not require us to refer to some extraneous variable `e`, as `e` is irrelevant and merely must exist.
+
+Such a type declaration can of course be generalized to work for any predicate `P e` in place of `n == e + e`:
+
+-}
+
+data ForSomeNat : (Nat -> Set) -> Set where
+  mkForSomeNat : {P : Nat -> Set} -> (e : Nat) -> P e -> ForSomeNat P
+
+IsEven' : Nat -> Set
+IsEven' n = ForSomeNat P
+  where
+    P : Nat -> Set
+    P e = n == (e + e)
+
+IsEven'-to-IsEven : {n : Nat} -> IsEven' n -> IsEven n
+IsEven'-to-IsEven (mkForSomeNat e n-eq-e+e) = mkIsEven e n-eq-e+e
+
+IsEven-to-IsEven' : {n : Nat} -> IsEven n -> IsEven' n
+IsEven-to-IsEven' (mkIsEven e n-eq-e+e) = mkForSomeNat e n-eq-e+e
+
+{-
+
+`IsEven n` can only be meaningfully seen as a proposition, since for any `n` it has exactly 0 or 1 inhabitants.
+
+More generally, however, existential types can be used to encode various data types:
+
+-}
+
+List' : Set -> Set
+List' A = ForSomeNat P
+  where
+    P : Nat -> Set
+    P n = Vec n A
+
+
+{-
+
+`List'` is a so called "dependent pair", as it contains a natural number, `n`, and a value whose type depends on `n`.
+
+The existential `Nat` is the length of the list, and is followed by a `Vec` of that length:
+
+-}
+
+length' : {A : Set} -> List' A -> Nat
+length' (mkForSomeNat e xs) = e
+
+List'-to-Vec : {A : Set} -> (l : List' A) -> Vec (length' l) A
+List'-to-Vec (mkForSomeNat e xs) = xs
+
+_++'_ : {A : Set} -> List' A -> List' A -> List' A
+mkForSomeNat e1 xs ++' mkForSomeNat e2 ys = mkForSomeNat (e1 + e2) (concat-Vecs xs ys)
+
+{-
+
+While the definition of `Vec` went out of its way to expose this length at the type level, existentials let us hide it.
+
+Of course, there is no reason to restrict ourselves to naturals, so we can define a generalized dependent pair type:
+
+-}
+
+data Sigma : (A : Set) -> (A -> Set) -> Set where
+  sigma : {A : Set} {P : A -> Set} -> (a : A) -> P a -> Sigma A P
+
+fst' : {A : Set} {P : A -> Set} -> Sigma A P -> A
+fst' (sigma a p-a) = a
+
+snd' : {A : Set} {P : A -> Set} -> (x : Sigma A P) -> P (fst' x)
+snd' (sigma a p-a) = p-a
+
+{-
+
+Dependent pairs are referred to as "sigma types", hinting at their algebraic meaning as iterated summations.
+
+In math, the capital greek letter sigma is often used to write summations like "the sum from n = 1 to 5 of f(n)".
+
+We can write almost exactly this with `Sigma`:
+
+-}
+
+Five-way-Sum : (Five -> Set) -> Set
+Five-way-Sum F = Sigma Five F
+
+{-
+
+Indeed, a `Five-way-Sum` contains "Either" a `F 1/Five`, or a `F 2/Five`, or a `F 3/Five`, and so on.
+
+The degenerate case of an iterated summation, where the changing variable `n` is ignored, is just a boring product.
+
+For example "the sum from n = 1 to 5 of 3" is just "5 * 3":
+
+-}
+
+Fifteen : Set
+Fifteen = Five-way-Sum F
+  where
+    F : Five -> Set
+    F n = Three
+
+{-
+
+Sigma types are referred to both as dependent sums, and as dependent pairs, as they degeneralize in two respective ways:
+
+-}
+
+Either' : Set -> Set -> Set
+Either' A B = Sigma Bool P
+  where
+    P : Bool -> Set
+    P false = A
+    P true = B
+
+Pair' : Set -> Set -> Set
+Pair' A B = Sigma A P
+  where
+    P : A -> Set
+    P a = B
+
+{-
+
+Sigma's algebraic meaning as an iterated sum lines up beautifully with its logical meaning as an "exists" operator.
+
+"There exists an x such that P(x)" effectively means "P(x1) or P(x2) or P(x3)..." expanded to include every "xn".
+
+By generalizing each "or" to a "plus", existentiality suddenly generalizes into iterated addition.
+
+Previously we observed that dependent functions can be used to express universality, or "forall".
+
+With this same trick, "forall x, P(x)" aka "P(x1) and P(x2) and P(x3)..." generalizes into iterated multiplication.
+
+Consequently, dependent functions are referred to as "pi types", akin to the notation for expressing iterated products:
+
+-}
+
+Pi : (A : Set) -> (A -> Set) -> Set
+Pi A P = (a : A) -> P a
+
+{-
+
+Pi types are similarly referred to both as "dependent products" and "dependent functions", and degeneralize as follows:
+
+-}
+
+Pair'' : Set -> Set -> Set
+Pair'' A B = Pi Bool P
+  where
+    P : Bool -> Set
+    P false = A
+    P true = B
+
+_->'_ : Set -> Set -> Set
+A ->' B = Pi A P
+  where
+    P : A -> Set
+    P a = B
+
+{-
+
+Confusingly, while "products" are computationally realized by "pairs", "dependent products" are not "dependent pairs".
+
+The following table clarifies the various terminology used to refer to these types:
+
+       | computationally    | algebraically     | logically
+-----------------------------------------------------------------
+Either | tagged union       | sum               | or
+Sigma  | dependent pair     | dependent sum     | exists
+Pair   | pair               | product           | and
+Pi     | dependent function | dependent product | forall
+_->_   | function           | exponential       | implies
+
+Exercises:
+
+-}
+
+-- todo:
+
+{-
+
+Chapter 8. Equivalence Relations
+
+-}
