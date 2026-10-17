@@ -15,7 +15,7 @@ Learning to formally state and prove propositions about programs and other mathe
 - Setting up Agda in Emacs
 - Loading the file with `C-c C-l`
 - Adjusting font size with `C-c C-+`, `C-c C--`
-- Canceling commands with `C-g` or `\<ESC\>\<ESC\>\<ESC\>`
+- Canceling commands with `C-g` or `<ESC><ESC><ESC>`
 ### Part 1. Pure Functional Programming
 - Purity and totality
 #### Chapter 1. Booleans
