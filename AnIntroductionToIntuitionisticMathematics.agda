@@ -79,15 +79,20 @@ Rather than accepting two inputs at once, we can accept one input, and then outp
 
 So instead of the "uncurried" function type `(A, B) -> C`, we use the "curried" function type `A -> (B -> C)`.
 
-Consequently we don't write function application like `f(x, y)`, but rather like `f(x)(y)`, or in Agda just `f x y`.
-
-Notably, the function arrow is right-associative, meaning `A -> (B -> C)` can be written simply as `A -> B -> C`.
-
 One such function with two inputs and one output is the boolean `and` operation:
 
 -}
 
 and : Bool -> Bool -> Bool
+
+{-
+
+Notably, the function arrow is right-associative, meaning `A -> (B -> C)` can be written simply as `A -> B -> C`.
+
+To apply a curried function, rather than writing `f(x, y)` we simply write `f(x)(y)` or in Agda just `f x y`:
+
+-}
+
 and false false = false
 and false true = false
 and true false = false
@@ -97,7 +102,7 @@ and true true = true
 
 The definitions of `not` and `and` use so-called "pattern matching" to map every possible set of inputs to an output.
 
-However we can also bind input parameters to variables, which match any input and can be used to define an output:
+Another way to define functions is by binding input parameters to variables which are then used to define the output:
 
 -}
 
@@ -123,11 +128,11 @@ xor false x = false
 
 The last case gives the impression that `xor false x` is always equal to `false`, for any `x`.
 
-However, it overlaps with the previous case, and therefore only holds if the inputs do not match `false true`.
+However, it overlaps with the previous case, `xor false true`, and therefore only holds if `x` is not equal to `true`.
 
-Agda even highlights this case to indicate that it overlaps with previous cases and might not be a true equality.
+Agda even highlights this case to indicate that it may overlap with previous cases and might not be a true equality.
 
-Naturally, functions may also be defined in terms of other previously defined functions:
+When possible, we usually will want to define functions in terms of other, previously defined functions:
 
 -}
 
@@ -136,13 +141,13 @@ implies l r = or r (not l) -- "l implies r" is equivalent to "r or not l"
 
 {-
 
-Function application is left-associative, so `or r (not l)` is parsed as `or(r)(not(l))`, not as `or(r(not(l)))`.
+Function application is left-associative, so `or r (not l)` gets parsed as `or(r)(not(l))`, not as `or(r(not(l)))`.
 
 The parentheses used here are critical, as `or r not l` would be parsed as `or(r)(not)(l)`.
 
 Try deleting these parentheses, reloading with C-c C-l, and making sense of the error message you get.
 
-Be sure to undo these changes and reload again to get rid of the error message.
+Be sure to undo these changes (with "C-/" in Emacs) and reload again to get rid of the error message.
 
 Like any programming language, Agda supports comments, which are ignored by the typechecker and have no effect on code.
 
@@ -174,9 +179,7 @@ l && r = and l r
 
 {-
 
-This defines a synonym for `and` called `_&&_`, where `l && r` carries the same exact meaning as `_&&_ l r`.
-
-We could have just as well written "_&&_ l r = and l r" for the definition, as there is absolutely no difference.
+This defines a synonym for `and` called `_&&_`, where `l && r` carries the exact same meaning as `_&&_ l r`.
 
 Note that the whitespace between each symbol is mandatory, as "l&&r" would be parsed as a singular, unrelated symbol.
 
@@ -184,9 +187,8 @@ Another useful thing we can do in Agda is define "higher order functions" which 
 
 -}
 
--- Tells you whether the provided function outputs true for all inputs
-always-outputs-true : (Bool -> Bool) -> Bool
-always-outputs-true f = f false && f true
+is-the-not-function : (Bool -> Bool) -> Bool
+is-the-not-function f = f false && not (f true)
 
 {-
 
@@ -199,8 +201,8 @@ Not only are functions treated as first class values in Agda, but so are types, 
 BoolToBool : Set
 BoolToBool = Bool -> Bool
 
-always-outputs-false : BoolToBool -> Bool
-always-outputs-false f = not (f false) && not (f true)
+is-the-identity-function : BoolToBool -> Bool
+is-the-identity-function f = not (f false) && f true
 
 {-
 
@@ -210,85 +212,76 @@ When used in a type signature, Agda will happily substitute in the definition of
 
 Exercises:
 
-If you uncomment the following exercise and reload, the question mark should turn into a "hole" which looks like { }0.
-
--}
-
--- Ex1.1: Define a synonym for `or`
-
--- _||_ : Bool -> Bool -> Bool
--- x || y = ?
-
-{-
-
-Holes represent a missing part of a program that you plan to complete later, and can be filled in interactively.
-
-Write an expression in this hole and press C-c C-Space to ask Agda to type check it, and if successful, fill it in.
-
-Any error in an Agda file typically renders its editor support useless, so holes are crucial to keeping code well-typed.
-
-Another useful trick is to fill a hole with an expression containing yet more holes.
-
-We can do this by simply writing an expression containing question marks, and hitting C-c C-Space.
-
-Try this by uncommenting the following definition, reloading, writing "not ?" in the hole, and hitting C-c C-Space:
-
--}
-
--- Ex1.2: Define the nand operation
-
--- nand : Bool -> Bool -> Bool
--- nand x y = ?
-
-{-
-
-Note that you must reload with C-c C-l after making changes outside of a hole, otherwise Agda won't know about them.
-
-If you rename an input variable and try to use it to fill in a hole without reloading, Agda wont recognize it.
-
-This tutorial contains an excess of exercises, so complete whatever interests you before moving on to the next chapter.
+Complete at least the first two exercises of this chapter to learn the basics of Agda's interactive editing.
 
 If you get stuck on or lose interest in an exercise, just skip it since you can always come back to it later.
 
 -}
+
+-- Ex1.1: Define `_||_` as a synonym for `or`
+
+-- Uncomment the following definition and reload, causing the `?` to turn into a "hole" which should look like `{ }0`.
+-- Holes represent a missing part of a definition that you plan to complete later, and can be filled in interactively.
+-- Write an expression in this hole and press "C-c C-Space" to ask Agda to type check it, and if successful, fill it in.
+-- Most errors typically render Agda's editor support useless, so holes are crucial to keeping code well-typed.
+
+-- _||_ : Bool -> Bool -> Bool
+-- x || y = ?
+
+-- Ex1.2: Define the nand operation
+
+-- Another useful trick is to fill a hole with an expression containing yet more holes.
+-- We can do this by simply writing an expression containing question marks, and hitting "C-c C-Space".
+-- Uncomment the following definition, reload, write `not ?` in the hole, and hit "C-c C-Space":
+
+-- nand : Bool -> Bool -> Bool
+-- nand x y = ?
+
+-- Important note: you *must* reload after making changes outside of a hole, otherwise Agda won't know about them.
+-- E.g. If you rename an input variable and try to use it to fill in a hole without reloading, Agda wont recognize it.
 
 -- Ex1.3: `and` for 3 inputs
 
 -- and3 : Bool -> Bool -> Bool -> Bool
 -- and3 x y z = ?
 
--- Ex1.4: Define a synonym for `implies`
-
--- _=>_ : Bool -> Bool -> Bool
-
--- Ex1.5: Define a synonym for `xor`
+-- Ex1.4: Define a synonym for `xor`, adding the missing type signature
 
 -- x ^^ y = ?
 
--- Ex1.6: Define boolean equality, aka biimplication, as the symbol _<=>_
+-- Ex1.5: Define a synonym for `implies`, adding the missing definition clause
+
+-- _=>_ : Bool -> Bool -> Bool
+
+-- Ex1.6: Define boolean equality, aka biimplication, as the symbol `_<=>_`
 
 -- Ex1.7: Define the following higher order functions
 
--- A function which tells you whether the provided function always outputs the same input it is given
+-- Returns true when the provided function returns true for all boolean inputs
+-- forall-Bool : (Bool -> Bool) -> Bool
+-- forall-Bool f = ?
 
--- is-the-identity-function : (Bool -> Bool) -> Bool
--- is-the-identity-function f = ?
+-- Returns true when the provided function returns true for some boolean input
+-- exists-Bool : (Bool -> Bool) -> Bool
+-- exists-Bool f = ?
 
--- Define a function which tells you whether its input is the `not` function
+-- Returns true if the provided function is equivalent to `and` for all inputs
+-- is-the-and-function : (Bool -> Bool -> Bool) -> Bool
+-- is-the-and-function f = ?
 
 -- Ex1.8: Define all four distinct functions of type `Bool -> Bool`
 
--- BoolToBoolA : BoolToBool
--- BoolToBoolA x = ?
+-- 1/BoolToBool : BoolToBool
+-- 1/BoolToBool x = ?
 
--- BoolToBoolB : BoolToBool
--- BoolToBoolB x = ?
+-- 2/BoolToBool : BoolToBool
+-- 2/BoolToBool x = ?
 
--- BoolToBoolC : BoolToBool
--- BoolToBoolC x = ?
+-- 3/BoolToBool : BoolToBool
+-- 3/BoolToBool x = ?
 
--- BoolToBoolD : BoolToBool
--- BoolToBoolD x = ?
+-- 4/BoolToBool : BoolToBool
+-- 4/BoolToBool x = ?
 
 -- Ex1.9: Compare two `Bool -> Bool`s for equality
 
@@ -321,7 +314,7 @@ data MaybeBool : Set where
 
 Tips and Tricks:
 
-To test your code, you can normalize an expression within a hole by entering the key combo C-c C-n.
+To test your code, you can normalize an expression within a hole by entering the key combo "C-c C-n".
 
 To create a throw-away hole for such purposes you can use an anonymous, unnamed definition like "_ = ?".
 
@@ -343,15 +336,23 @@ While working on a definition, it can often help split the window in order to re
 
 Challenge Exercises:
 
-Beware: challenge exercises are not important and can be very time consuming!
-
 -}
 
--- Ce1.1: Properties of binary relations
+-- Beware: challenge exercises are not important and can be very time consuming.
+
+-- Ce1.1: Excessively higher order functions
+
+-- is-the-[is-the-not-function]-function : ((Bool -> Bool) -> Bool) -> Bool
+-- is-the-[is-the-not-function]-function f = ?
+
+-- is-the-[is-the-[is-the-not-function]-function]-function : (((Bool -> Bool) -> Bool) -> Bool) -> Bool
+-- is-the-[is-the-[is-the-not-function]-function]-function f = ?
+
+-- Ce1.2: Properties of binary relations
 
 -- A binary relation `r : A -> A -> Bool` can be classified by a number of properties such as being:
--- functional when, for any `x` `y` and `z`, `(r x y && r x z) => (y == z)`
--- injective when, for any `x` `y` and `z`, `(r x z && r y z) => (x == y)`
+-- functional when, for any `x` `y` and `z`, `(r x y && r x z) => (y = z)`
+-- injective when, for any `x` `y` and `z`, `(r x z && r y z) => (x = y)`
 -- total when, for any `x`, there exists a `y` such that `r x y`
 
 -- We can define a binary relation over functions between booleans as:
@@ -373,7 +374,7 @@ BoolToBoolRel = BoolToBool -> BoolToBool -> Bool
 -- total-functional-BoolToBoolRel-to-function : BoolToBoolRel -> BoolToBool -> BoolToBool
 -- total-functional-BoolToBoolRel-to-function r f x = ?
 
--- Ce1.2: Modeling bounded number types
+-- Ce1.3: Modeling bounded number types
 
 -- Just as there are 4 different `Bool -> Bool`s, there are 16 different `Bool -> Bool -> Bool`s.
 -- Furthermore, there are a whopping 256 different `Bool -> Bool -> Bool -> Bool`s.
@@ -404,11 +405,6 @@ UInt8 = Bool -> Bool -> Bool -> Bool
 
 -- multiplyUInt4 : UInt4 -> UInt4 -> UInt8
 -- multiplyUInt4 f g x y z = ?
-
--- Ce1.3: Counting boolean function types
-
--- How many different `(Bool -> Bool) -> Bool -> Bool`s are there?
--- How many different `((Bool -> Bool) -> Bool) -> Bool`s are there?
 
 {-
 
@@ -448,7 +444,7 @@ We could port this definition of Nat into a typical imperative programming langu
   ...
   Nat three = new suc(n = new suc(n = new suc(n = new zero())))
 
-This singly-linked-list representation of the natural numbers is obviously quite bloated and inefficient for most tasks.
+This "singly-linked-list" representation of the natural numbers is obviously quite inefficient.
 
 However, as we will see soon, it excels at justifying the existence of recursive functions accepting natural numbers.
 
@@ -475,11 +471,11 @@ is-two other = false -- is-two(other) = false
 
 isGreaterThan-two : Nat -> Bool
 isGreaterThan-two (suc (suc (suc n))) = true -- isGreaterThan-two(n + 1 + 1 + 1) = true
-isGreaterThan-two other = false -- isGreaterThan-two(other) = true
+isGreaterThan-two other = false -- isGreaterThan-two(other) = false
 
 {-
 
-As mentioned previously, we can also define functions recursively:
+To define more interesting functions accepting `Nat`s, we can use pattern matching together with recursion:
 
 -}
 
@@ -487,19 +483,19 @@ isEven : Nat -> Bool
 isEven zero = true -- zero is even
 isEven (suc n) = not (isEven n) -- n+1 is even <=> n is not even
 
--- Halves the input and rounds it up to the next whole number
+-- Halves the input, rounding up to the next whole number
 halfOf : Nat -> Nat
-halfOf zero = zero -- ceil(0 / 2) = 0
-halfOf (suc zero) = suc zero -- ceil(1 / 2) = 1
-halfOf (suc (suc n)) = suc (halfOf n) -- ceil((n + 2) / 2) = 1 + ceil(n / 2)
+halfOf zero = zero
+halfOf (suc zero) = suc zero
+halfOf (suc (suc n)) = suc (halfOf n)
 
 {-
 
-It is important that we use recursion in a safe manner to avoid defining non-total "functions" which may loop forever.
+It is important that we use recursion in a safe manner and avoid defining non-total "functions" which can loop forever.
 
 The recursive calls here are clearly safe since `n` is literally a smaller piece of data than `suc n` or `suc (suc n)`.
 
-If recursive calls only are made on "structurally" smaller pieces of data, then the function must terminate eventually.
+If a function only recurses on so-called "structurally" smaller pieces of data, then it must terminate eventually.
 
 This is in contrast to the following definition, which is not a total function and results in a termination error:
 
@@ -515,7 +511,7 @@ Here, not only is the input parameter not shrinking with each recursive call, it
 
 A function being total, however, is no guarantee that the termination checker will be able to see that it is total.
 
-To keep Agda's termination checking reliable, this structural shrinking needs to be obvious at the syntax level.
+To keep Agda's termination checking reliable, this structural shrinking needs to be obvious at a syntactic level.
 
 For example, we can't use another function which makes its input smaller, such as `pred`, in place of pattern matching:
 
@@ -527,50 +523,11 @@ For example, we can't use another function which makes its input smaller, such a
 
 {-
 
-Even though the above definition of isEven' is equivalent to the original isEven, Agda cannot see that it terminates.
+Even though the above definition of `isEven'` is equivalent to the original `isEven`, Agda can't see that it terminates.
 
-This limitation may sound problematic, but in practice it can be worked around with a variety of tricks.
+Determining whether any arbitrary function shrinks its input is impossible in general, so Agda does not bother trying.
 
-For example, say we want to compute the minimum number of bits required to represent a natural number in binary.
-
-We can do so by observing how often we must halve a number (rounded up) before it reaches 1:
-  binLength(0) = 1
-  binLength(1) = 1
-  binLength(n) = 1 + binLength(ceil(n / 2))
-
-However we cannot halve a number by pattern matching, and Agda cannot see that the following definition terminates:
-
--}
-
--- bad-binLength : Nat -> Nat
--- bad-binLength zero = one
--- bad-binLength (suc zero) = one
--- bad-binLength n = suc (bad-binLength (halfOf n))
-
-{-
-
-Proving that halfOf always shrinks its input is non-trivial, so Agda does not even bother trying to do so.
-
-The simplest workaround is to use a helper function which recurses over a sufficiently large dummy parameter:
-
--}
-
-binLength-helper : Nat -> Nat -> Nat
-binLength-helper dummy zero = one -- binLength(0) = 1
-binLength-helper dummy (suc zero) = one -- binLength(1) = 1
-binLength-helper (suc dummy) n = suc (binLength-helper dummy (halfOf n)) -- binLength(n) = 1 + (binLength(n / 2))
-binLength-helper zero n = zero -- This case cannot be reached and is only here to reassure the termination checker
-
-binLength : Nat -> Nat
-binLength n = binLength-helper n n
-
-{-
-
-The dummy parameter can be thought of as "recursion fuel", and is irrelevant to the computation if it is large enough.
-
-While it is good to be aware of this admittedly quite ugly trick, the reader will not be expected to use it.
-
-Most definitions, and any (non-challenge) exercise in this tutorial, can be completed elegantly with regular recursion:
+In practice, nearly all useful functions can be defined while strictly adhering to structural recursion:
 
 -}
 
@@ -582,11 +539,11 @@ suc n + m = suc (n + m) -- (1 + n) + m = 1 + (n + m)
 
 Again, notice how the first input, which we are recursing over, *visibly* shrinks from `suc n` to `n`.
 
-While this is great if we are concerned about mathematical validity of our definitions, it is terrible for performance.
+This is great if we are concerned about mathematical validity of our definitions, yet it is terrible for performance.
 
-The amount of space required to write or store a natural number is proportional to the very same natural number.
+The amount of space required to write or store a `Nat` in memory is proportional to the very same natural number.
 
-An unsurprising consequence of this is that many useful operations on natural numbers tend to run in linear time.
+One consequence of this is that many useful operations on natural numbers, such as `_+_`, run in linear time.
 
 To remedy this, Agda allows us to mark certain definitions with `BUILTIN` pragmas:
 
@@ -602,7 +559,7 @@ To remedy this, Agda allows us to mark certain definitions with `BUILTIN` pragma
 
 Agda is smart enough to recognize that our `Nat` is a natural number, and that our `_+_` is a valid addition operation.
 
-Thanks to `BUILTIN NATURAL`, we now can write `Nat`s with numeric literals:
+These builtins let us write `Nat`s with numeric literals, and add large numbers without causing Agda to hang:
 
 -}
 
@@ -616,37 +573,60 @@ is-three : Nat -> Bool
 is-three 3 = true
 is-three n = false
 
-
-{-
-
-We also can now add large numbers without causing Agda to hang:
-
--}
-
--- Try uncommenting the following hole and normalizing the contents with C-c C-n
+-- Try uncommenting the following hole and normalizing its contents with C-c C-n
 
 -- _ = {! 200000000000000000 + 300000000000000000 !}
 
 {-
 
+Finally, let us briefly consider how we might write a function which cannot be cleanly defined by structural recursion.
+
+Say we want to compute the minimum number of bits required to represent a natural number in binary.
+
+We can do so by observing how often we must halve a number (rounded up) before it reaches 1:
+
+-}
+
+-- bad-binLength : Nat -> Nat
+-- bad-binLength 0 = 1
+-- bad-binLength 1 = 1
+-- bad-binLength n = 1 + (bad-binLength (halfOf n))
+
+{-
+
+We sadly cannot halve a number by pattern matching, and commenting in the above definition yields a termination error.
+
+The simplest workaround is to use a helper function which recurses over a sufficiently large dummy parameter:
+
+-}
+
+binLength-helper : Nat -> Nat -> Nat
+binLength-helper dummy 0 = 1
+binLength-helper dummy 1 = 1
+binLength-helper (suc dummy) n = 1 + (binLength-helper dummy (halfOf n))
+binLength-helper zero n = zero -- This case will never be reached and is only here to reassure the termination checker
+
+binLength : Nat -> Nat
+binLength n = binLength-helper n n
+
+{-
+
+The dummy parameter can be thought of as "recursion fuel", and is irrelevant to the computation if it is large enough.
+
+Note that all non-challenge exercises can be completed without this trick, purely in terms of structural recursion.
+
 Exercises:
 
-Agda will help you interactively perform pattern matching on a variable of your choice with the case-split command.
-
-Uncomment the following definition, reload, write "n" in the hole, and press C-c C-c with your cursor still in the hole:
+Complete at least the first exercise of this chapter to learn how to perform interactive pattern matching.
 
 -}
 
 -- Ex2.1: Interactive pattern matching
 
+-- Uncomment the following definition, reload, write "n" in the hole, and press C-c C-c with your cursor in the hole:
+
 -- isOdd : Nat -> Bool
 -- isOdd n = ?
-
-{-
-
-Be sure to take full advantage of Agda's interactive editing when completing exercises.
-
--}
 
 -- Ex2.2: Arithmetic
 
@@ -836,7 +816,8 @@ Challenge Exercises:
 -- _%[1+_] : Nat -> Nat -> Nat
 -- n %[1+ m ] = ?
 
--- Define a function which enumerates the prime numbers
+-- Ce2.3: Enumerate the prime numbers
+
 -- primes : Nat -> Nat
 -- primes n = ?
 
@@ -856,7 +837,7 @@ id-for-Bool x = x
 id-for-Nat : Nat -> Nat
 id-for-Nat x = x
 
-id-for-BoolToBool : (Bool -> Bool) -> Bool -> Bool
+id-for-BoolToBool : BoolToBool -> BoolToBool
 id-for-BoolToBool x = x
 
 {-
@@ -1307,7 +1288,6 @@ However, you could also just write `op` into it, and hit C-c C-r to "refine" the
 Challenge Exercises:
 
 -}
-
 
 -- Ce3.1: Complete an insanely polymorphic definition
 
@@ -3492,7 +3472,7 @@ mkForSomeNat e1 xs ++' mkForSomeNat e2 ys = mkForSomeNat (e1 + e2) (concat-Vecs 
 
 While the definition of `Vec` went out of its way to expose this length at the type level, existentials let us hide it.
 
-Of course, there is no reason to restrict ourselves to naturals, so we can define a generalized dependent pair type:
+Of course, there is no reason to restrict ourselves to `Nat`s, so we can define a generalized dependent pair type:
 
 -}
 
@@ -3613,6 +3593,6 @@ Exercises:
 
 {-
 
-Chapter 8. Equivalence Relations
+Chapter 8. Quotient Types
 
 -}
